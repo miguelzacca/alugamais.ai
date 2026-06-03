@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel - AlugaMais</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/global.css">
+    <style>
+        .app-layout {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            background-color: hsl(var(--surface-color));
+            border-right: 1px solid var(--glass-border);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: hsl(var(--primary-color));
+            margin-bottom: 3rem;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1rem;
+            color: hsl(var(--text-secondary));
+            border-radius: var(--radius-md);
+            margin-bottom: 0.5rem;
+            transition: all var(--transition-speed);
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background-color: hsla(var(--primary-color), 0.1);
+            color: hsl(var(--primary-color));
+        }
+
+        .logout-btn {
+            margin-top: auto;
+            color: hsl(var(--danger));
+            background: none;
+            border: none;
+            padding: 0.8rem 1rem;
+            text-align: left;
+            width: 100%;
+            border-radius: var(--radius-md);
+            transition: background-color var(--transition-speed);
+        }
+
+        .logout-btn:hover {
+            background-color: hsla(var(--danger), 0.1);
+        }
+
+        .main-content {
+            padding: 2rem 3rem;
+            background-color: hsl(var(--bg-color));
+            overflow-y: auto;
+        }
+
+        .header-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .user-greeting {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            padding: 1.5rem;
+        }
+
+        .stat-title {
+            color: hsl(var(--text-secondary));
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: hsl(var(--text-primary));
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            border: 1px dashed var(--glass-border);
+            border-radius: var(--radius-md);
+            color: hsl(var(--text-secondary));
+        }
+
+        .rental-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .rental-item:last-child {
+            border-bottom: none;
+        }
+
+        .rental-info h4 {
+            margin-bottom: 0.2rem;
+        }
+        .rental-info p {
+            font-size: 0.85rem;
+            color: hsl(var(--text-secondary));
+        }
+
+        .rental-amount {
+            font-weight: 600;
+            color: hsl(var(--success));
+        }
+
+        .loader {
+            text-align: center;
+            padding: 2rem;
+            color: hsl(var(--text-secondary));
+        }
+    </style>
+</head>
+<body>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <div class="sidebar-logo">AlugaMais</div>
+            <nav>
+                <a href="#" class="nav-link active">Painel</a>
+                <a href="#" class="nav-link">Imóveis</a>
+                <a href="#" class="nav-link">Inquilinos</a>
+            </nav>
+            <button class="logout-btn" onclick="logout()">Sair</button>
+        </aside>
+
+        <main class="main-content">
+            <div class="header-actions">
+                <h1 class="user-greeting">Olá, <span id="userName">...</span></h1>
+                <a href="/new-rental.html" class="btn btn-primary">+ Novo Aluguel</a>
+            </div>
+
+            <div id="dashboard-content" style="display: none;">
+                <div class="stats-grid">
+                    <div class="stat-card glass-panel">
+                        <div class="stat-title">Receita Prevista (Mês)</div>
+                        <div class="stat-value" id="stat-revenue">R$ 0,00</div>
+                    </div>
+                    <div class="stat-card glass-panel">
+                        <div class="stat-title">Aluguéis Ativos</div>
+                        <div class="stat-value" id="stat-active">0</div>
+                    </div>
+                    <div class="stat-card glass-panel">
+                        <div class="stat-title">Inadimplentes</div>
+                        <div class="stat-value" style="color: hsl(var(--danger))" id="stat-late">0</div>
+                    </div>
+                </div>
+
+                <div class="section-header">
+                    <h2>Meus Aluguéis</h2>
+                </div>
+                
+                <div class="glass-panel" id="rentals-list">
+                    <!-- Populated via JS -->
+                </div>
+            </div>
+            
+            <div id="loader" class="loader">Carregando painel...</div>
+        </main>
+    </div>
+
+    <script type="module">
+        const token = localStorage.getItem('alugamais_token');
+        if (!token) window.location.href = '/login.html';
+
+        function parseJwt(token) {
+            try {
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                return JSON.parse(decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
+            } catch(e) { return null; }
+        }
+
+        const user = parseJwt(token);
+        if (user) document.getElementById('userName').textContent = user.name.split(' ')[0];
+
+        window.logout = function() {
+            localStorage.removeItem('alugamais_token');
+            window.location.href = '/login.html';
+        }
+
+        // Fetch Dashboard Data
+        async function loadDashboard() {
+            try {
+                const res = await fetch('/api/dashboard', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (res.status === 401) return logout();
+                const data = await res.json();
+
+                // Format Currency
+                const BRL = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+
+                document.getElementById('stat-revenue').textContent = BRL.format(data.stats.expectedRevenue);
+                document.getElementById('stat-active').textContent = data.stats.activeRentals;
+                document.getElementById('stat-late').textContent = data.stats.latePayments;
+
+                const listContainer = document.getElementById('rentals-list');
+                
+                if (data.rentals.length === 0) {
+                    listContainer.innerHTML = `
+                        <div class="empty-state">
+                            Você ainda não cadastrou nenhum aluguel.<br><br>
+                            <a href="/new-rental.html" class="btn btn-primary">Começar a Cadastrar</a>
+                        </div>
+                    `;
+                } else {
+                    let html = '';
+                    data.rentals.forEach(r => {
+                        html += `
+                            <div class="rental-item">
+                                <div class="rental-info">
+                                    <h4>${r.address} ${r.buildingName ? `(${r.buildingName})` : ''}</h4>
+                                    <p>Inquilino: ${r.tenantName} • Vence dia ${r.dueDateDay}</p>
+                                </div>
+                                <div class="rental-amount">${BRL.format(r.baseRent)}</div>
+                            </div>
+                        `;
+                    });
+                    listContainer.innerHTML = html;
+                }
+
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('dashboard-content').style.display = 'block';
+            } catch (err) {
+                console.error(err);
+                document.getElementById('loader').textContent = 'Erro ao carregar dados.';
+            }
+        }
+
+        loadDashboard();
+    </script>
+</body>
+</html>

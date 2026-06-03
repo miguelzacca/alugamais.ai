@@ -4,7 +4,7 @@
   "description": "AlugaMais - Sistema de Gerenciamento de Aluguéis",
   "main": "index.js",
   "scripts": {
-    "dev": "vercel dev",
+    "dev": "tsx index.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
