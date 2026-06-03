@@ -1,7 +1,7 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { requireAuth } from './_utils/auth';
 import { db } from '../db';
-import { properties, rentals, rentalFees } from '../db/schema';
+import { owners, properties, rentals, rentalFees, monthlyCharges } from '../db/schema';
 import { eq } from 'drizzle-orm';
 import crypto from 'crypto';
 
@@ -9,33 +9,49 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const user = requireAuth(req, res);
   if (!user) return;
 
-  // GET - list all rentals with property info
   if (req.method === 'GET') {
     try {
       const userProperties = await db.select().from(properties).where(eq(properties.userId, user.userId));
+      const userOwners = await db.select().from(owners).where(eq(owners.userId, user.userId));
       const propertyIds = userProperties.map(p => p.id);
       const allRentals = await db.select().from(rentals);
       const userRentals = allRentals.filter(r => propertyIds.includes(r.propertyId));
 
       const result = userRentals.map(r => {
         const property = userProperties.find(p => p.id === r.propertyId);
-        return { ...r, property };
+        const owner = userOwners.find(o => o.id === property?.ownerId);
+        const commission = r.commissionType === 'percentage'
+          ? r.baseRentAmount * (r.commissionRate / 100)
+          : r.commissionRate;
+        const totalCommission = commission + (r.administrationFee || 0);
+        return {
+          ...r,
+          property,
+          owner,
+          commission: parseFloat(totalCommission.toFixed(2)),
+          ownerAmount: parseFloat((r.baseRentAmount - totalCommission).toFixed(2))
+        };
       });
-
       return res.status(200).json(result);
     } catch (err: any) {
       return res.status(500).json({ error: 'Erro ao listar aluguéis' });
     }
   }
 
-  // POST - create new rental
   if (req.method === 'POST') {
     try {
       const {
-        address, buildingName, propertyType, area, bedrooms, bathrooms,
+        // Property
+        address, buildingName, propertyType, area, bedrooms, bathrooms, ownerId,
+        // Tenant
         tenantName, tenantDocument, tenantEmail, tenantPhone,
-        baseRentAmount, moveInDate, contractEndDate, contractDurationMonths,
-        dueDateDay, indexType, indexRate, guaranteeType, notes,
+        // Financial
+        baseRentAmount, commissionType, commissionRate, administrationFee,
+        // Contract
+        moveInDate, contractEndDate, contractDurationMonths,
+        dueDateDay, ownerPaymentDay,
+        indexType, indexRate, guaranteeType, notes,
+        // Fees
         fees
       } = req.body;
 
@@ -50,6 +66,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       await db.insert(properties).values({
         id: propertyId,
         userId: user.userId,
+        ownerId: ownerId || null,
         address,
         buildingName: buildingName || null,
         propertyType: propertyType || 'apartment',
@@ -68,10 +85,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         tenantEmail: tenantEmail || null,
         tenantPhone: tenantPhone || null,
         baseRentAmount: parseFloat(baseRentAmount),
+        commissionType: commissionType || 'percentage',
+        commissionRate: commissionRate ? parseFloat(commissionRate) : 10,
+        administrationFee: administrationFee ? parseFloat(administrationFee) : 0,
         moveInDate: new Date(moveInDate),
         contractEndDate: contractEndDate ? new Date(contractEndDate) : null,
         contractDurationMonths: contractDurationMonths ? parseInt(contractDurationMonths) : null,
         dueDateDay: parseInt(dueDateDay),
+        ownerPaymentDay: ownerPaymentDay ? parseInt(ownerPaymentDay) : 10,
         indexType: indexType || 'none',
         indexRate: indexRate ? parseFloat(indexRate) : null,
         guaranteeType: guaranteeType || 'none',
@@ -88,6 +109,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             rentalId,
             feeType: fee.feeType,
             amount: parseFloat(fee.amount),
+            paidBy: fee.paidBy || 'tenant',
             validFromMonth: now.getMonth() + 1,
             validFromYear: now.getFullYear(),
             isVariable: fee.isVariable || false

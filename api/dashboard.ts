@@ -1,8 +1,8 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { requireAuth } from './_utils/auth';
 import { db } from '../db';
-import { properties, rentals, rentalFees, monthlyCharges, payments } from '../db/schema';
-import { eq, and, desc, sql } from 'drizzle-orm';
+import { owners, properties, rentals, rentalFees, monthlyCharges, payments } from '../db/schema';
+import { eq, desc } from 'drizzle-orm';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
@@ -15,14 +15,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const currentMonth = now.getMonth() + 1;
     const currentYear = now.getFullYear();
 
-    // Get all properties for this user
     const userProperties = await db.select().from(properties).where(eq(properties.userId, user.userId));
 
     if (userProperties.length === 0) {
       return res.status(200).json({
         stats: {
-          expectedRevenue: 0, activeRentals: 0, latePayments: 0,
-          pendingThisMonth: 0, paidThisMonth: 0, occupancyRate: 0, totalProperties: 0
+          commission: 0, activeRentals: 0, latePayments: 0,
+          pendingCommission: 0, paidCommission: 0, occupancyRate: 0,
+          totalProperties: 0, ytdCommission: 0, pendingOwnerRemittance: 0
         },
         rentals: [], upcomingDue: [], recentPayments: []
       });
@@ -33,41 +33,52 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const activeUserRentals = allRentals.filter(r => propertyIds.includes(r.propertyId) && r.status === 'active');
     const allUserRentals = allRentals.filter(r => propertyIds.includes(r.propertyId));
 
-    // Calculate expected revenue (base rent + active fees)
-    let expectedRevenue = 0;
+    // Expected monthly commission (imob revenue)
+    let expectedCommission = 0;
     for (const rental of activeUserRentals) {
-      expectedRevenue += rental.baseRentAmount;
-      const fees = await db.select().from(rentalFees).where(eq(rentalFees.rentalId, rental.id));
-      const currentFees = fees.filter(f => f.validToMonth === null);
-      for (const fee of currentFees) { expectedRevenue += fee.amount; }
+      const commission = rental.commissionType === 'percentage'
+        ? rental.baseRentAmount * (rental.commissionRate / 100)
+        : rental.commissionRate;
+      expectedCommission += commission + (rental.administrationFee || 0);
     }
 
-    // Get all monthly charges to calculate stats
+    // Monthly charges stats
     const allCharges = await db.select().from(monthlyCharges);
     const rentalIdSet = new Set(activeUserRentals.map(r => r.id));
     const userCharges = allCharges.filter(c => rentalIdSet.has(c.rentalId));
-
-    // Current month charges
     const thisMonthCharges = userCharges.filter(c => c.month === currentMonth && c.year === currentYear);
-    const paidThisMonth = thisMonthCharges.filter(c => c.status === 'paid').reduce((s, c) => s + c.totalAmount, 0);
-    const pendingThisMonth = thisMonthCharges.filter(c => c.status !== 'paid').reduce((s, c) => s + c.totalAmount, 0);
+
+    const paidCommission = thisMonthCharges.filter(c => c.status === 'paid').reduce((s, c) => s + c.totalCommission, 0);
+    const pendingCommission = thisMonthCharges.filter(c => c.status !== 'paid').reduce((s, c) => s + c.totalCommission, 0);
     const lateCharges = thisMonthCharges.filter(c => c.status === 'late').length;
 
-    // Upcoming due (rentals with due date in next 7 days)
+    // Pending owner remittances (paid charges where owner hasn't been repassed yet)
+    const pendingOwnerRemittance = thisMonthCharges
+      .filter(c => c.status === 'paid' && !c.ownerPaid)
+      .reduce((s, c) => s + c.ownerAmount, 0);
+
+    // YTD commission
+    const allIdSet = new Set(allUserRentals.map(r => r.id));
+    const allUserCharges = allCharges.filter(c => allIdSet.has(c.rentalId));
+    const ytdCommission = allUserCharges
+      .filter(c => c.year === currentYear && c.status === 'paid')
+      .reduce((s, c) => s + c.totalCommission, 0);
+
+    // Upcoming due
     const today = now.getDate();
     const upcomingDue = activeUserRentals
-      .filter(r => {
-        const diff = r.dueDateDay - today;
-        return diff >= 0 && diff <= 7;
-      })
+      .filter(r => { const diff = r.dueDateDay - today; return diff >= 0 && diff <= 7; })
       .map(r => {
         const property = userProperties.find(p => p.id === r.propertyId);
+        const commission = r.commissionType === 'percentage'
+          ? r.baseRentAmount * (r.commissionRate / 100)
+          : r.commissionRate;
         return {
-          id: r.id,
-          tenantName: r.tenantName,
+          id: r.id, tenantName: r.tenantName,
           address: property?.address,
           dueDay: r.dueDateDay,
-          amount: r.baseRentAmount,
+          grossAmount: r.baseRentAmount,
+          commission: commission + (r.administrationFee || 0),
           daysUntilDue: r.dueDateDay - today
         };
       })
@@ -82,20 +93,28 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .map(p => {
         const rental = allUserRentals.find(r => r.id === p.rentalId);
         const property = userProperties.find(pr => pr.id === rental?.propertyId);
+        const commission = rental
+          ? (rental.commissionType === 'percentage'
+              ? rental.baseRentAmount * (rental.commissionRate / 100)
+              : rental.commissionRate) + (rental.administrationFee || 0)
+          : 0;
         return {
-          id: p.id,
-          tenantName: rental?.tenantName,
+          id: p.id, tenantName: rental?.tenantName,
           address: property?.address,
-          amount: p.amount,
-          paidAt: p.paidAt,
-          method: p.paymentMethod
+          grossAmount: p.amount,
+          commission: parseFloat(commission.toFixed(2)),
+          paidAt: p.paidAt, method: p.paymentMethod
         };
       });
 
-    // Build rental list
+    // Build rental list with commission breakdown
     const rentalsList = activeUserRentals.map(r => {
       const property = userProperties.find(p => p.id === r.propertyId);
       const charge = thisMonthCharges.find(c => c.rentalId === r.id);
+      const commission = r.commissionType === 'percentage'
+        ? r.baseRentAmount * (r.commissionRate / 100)
+        : r.commissionRate;
+      const totalCommission = commission + (r.administrationFee || 0);
       return {
         id: r.id,
         address: property?.address,
@@ -104,27 +123,29 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         tenantName: r.tenantName,
         tenantEmail: r.tenantEmail,
         dueDateDay: r.dueDateDay,
-        baseRent: r.baseRentAmount,
-        totalAmount: charge?.totalAmount ?? r.baseRentAmount,
+        grossAmount: r.baseRentAmount,
+        commissionRate: r.commissionRate,
+        commissionType: r.commissionType,
+        commission: parseFloat(totalCommission.toFixed(2)),
+        ownerAmount: parseFloat((r.baseRentAmount - totalCommission).toFixed(2)),
         chargeStatus: charge?.status ?? 'pending',
+        ownerPaid: charge?.ownerPaid ?? false,
         status: r.status
       };
     });
 
-    // YTD revenue (paid charges this year)
-    const yearCharges = userCharges.filter(c => c.year === currentYear && c.status === 'paid');
-    const ytdRevenue = yearCharges.reduce((s, c) => s + c.totalAmount, 0);
-
     return res.status(200).json({
       stats: {
-        expectedRevenue,
+        expectedCommission: parseFloat(expectedCommission.toFixed(2)),
         activeRentals: activeUserRentals.length,
         latePayments: lateCharges,
-        paidThisMonth,
-        pendingThisMonth,
+        paidCommission: parseFloat(paidCommission.toFixed(2)),
+        pendingCommission: parseFloat(pendingCommission.toFixed(2)),
         occupancyRate: userProperties.length > 0 ? Math.round((activeUserRentals.length / userProperties.length) * 100) : 0,
         totalProperties: userProperties.length,
-        ytdRevenue
+        ytdCommission: parseFloat(ytdCommission.toFixed(2)),
+        pendingOwnerRemittance: parseFloat(pendingOwnerRemittance.toFixed(2)),
+        grossRentRoll: activeUserRentals.reduce((s, r) => s + r.baseRentAmount, 0)
       },
       rentals: rentalsList,
       upcomingDue,

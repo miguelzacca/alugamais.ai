@@ -173,24 +173,24 @@
             <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
                 <div class="stat-card glass-panel">
                     <div class="stat-card-icon" style="background:hsla(var(--primary-color)/0.12);color:hsl(var(--primary-color))">💰</div>
-                    <div class="stat-label">Receita do Mês</div>
+                    <div class="stat-label">Comissão Prevista</div>
                     <div class="stat-value" id="stat-revenue">—</div>
                     <div class="stat-change" id="stat-revenue-sub"></div>
                 </div>
                 <div class="stat-card glass-panel">
                     <div class="stat-card-icon" style="background:hsla(var(--success)/0.12);color:hsl(var(--success))">🏠</div>
-                    <div class="stat-label">Aluguéis Ativos</div>
+                    <div class="stat-label">Contratos Ativos</div>
                     <div class="stat-value" id="stat-active">—</div>
                     <div class="stat-change" id="stat-occupancy"></div>
                 </div>
                 <div class="stat-card glass-panel">
                     <div class="stat-card-icon" style="background:hsla(var(--success)/0.12);color:hsl(var(--success))">✅</div>
-                    <div class="stat-label">Recebido (Mês)</div>
+                    <div class="stat-label">Comissão Recebida</div>
                     <div class="stat-value text-success" id="stat-paid">—</div>
                 </div>
                 <div class="stat-card glass-panel">
-                    <div class="stat-card-icon" style="background:hsla(var(--danger)/0.12);color:hsl(var(--danger))">⚠️</div>
-                    <div class="stat-label">Pendente (Mês)</div>
+                    <div class="stat-card-icon" style="background:hsla(var(--warning)/0.12);color:hsl(var(--warning))">⏳</div>
+                    <div class="stat-label">Comissão Pendente</div>
                     <div class="stat-value text-warning" id="stat-pending">—</div>
                 </div>
                 <div class="stat-card glass-panel">
@@ -199,8 +199,14 @@
                     <div class="stat-value text-danger" id="stat-late">—</div>
                 </div>
                 <div class="stat-card glass-panel">
+                    <div class="stat-card-icon" style="background:hsla(var(--info)/0.12);color:hsl(var(--info))">📤</div>
+                    <div class="stat-label">Repasse Pendente</div>
+                    <div class="stat-value text-warning" id="stat-repasse">—</div>
+                    <div class="stat-change">a repassar proprietários</div>
+                </div>
+                <div class="stat-card glass-panel">
                     <div class="stat-card-icon" style="background:hsla(var(--accent)/0.12);color:hsl(var(--accent))">📈</div>
-                    <div class="stat-label">Receita Anual</div>
+                    <div class="stat-label">Comissão Anual</div>
                     <div class="stat-value" id="stat-ytd">—</div>
                 </div>
             </div>
@@ -299,14 +305,15 @@
             const data = await res.json();
             const s = data.stats;
 
-            document.getElementById('stat-revenue').textContent = BRL.format(s.expectedRevenue);
-            document.getElementById('stat-revenue-sub').textContent = `${s.totalProperties} imóvel(is) cadastrado(s)`;
+            document.getElementById('stat-revenue').textContent = BRL.format(s.expectedCommission || 0);
+            document.getElementById('stat-revenue-sub').textContent = `Aluguel bruto: ${BRL.format(s.grossRentRoll || 0)}`;
             document.getElementById('stat-active').textContent = s.activeRentals;
             document.getElementById('stat-occupancy').innerHTML = `<span class="${s.occupancyRate >= 80 ? 'up' : 'down'}">${s.occupancyRate}% de ocupação</span>`;
-            document.getElementById('stat-paid').textContent = BRL.format(s.paidThisMonth || 0);
-            document.getElementById('stat-pending').textContent = BRL.format(s.pendingThisMonth || 0);
+            document.getElementById('stat-paid').textContent = BRL.format(s.paidCommission || 0);
+            document.getElementById('stat-pending').textContent = BRL.format(s.pendingCommission || 0);
             document.getElementById('stat-late').textContent = s.latePayments;
-            document.getElementById('stat-ytd').textContent = BRL.format(s.ytdRevenue || 0);
+            document.getElementById('stat-repasse').textContent = BRL.format(s.pendingOwnerRemittance || 0);
+            document.getElementById('stat-ytd').textContent = BRL.format(s.ytdCommission || 0);
 
             // Rentals list
             const rentalsList = document.getElementById('rentals-list');
@@ -318,10 +325,13 @@
                     <div class="rental-row">
                         <div class="rental-row-info">
                             <h4>${r.address}${r.buildingName ? ` <span style="font-weight:400;color:hsl(var(--text-secondary))">(${r.buildingName})</span>` : ''}</h4>
-                            <p>${r.tenantName} • Vence dia ${r.dueDateDay}</p>
+                            <p>${r.tenantName} • Aluguel: ${BRL.format(r.grossAmount)} • Vence dia ${r.dueDateDay}</p>
                         </div>
                         <div>${statusBadge(r.chargeStatus)}</div>
-                        <div class="rental-row-amount">${BRL.format(r.totalAmount)}</div>
+                        <div style="text-align:right">
+                            <div style="font-weight:700;font-size:0.9rem;color:hsl(var(--success))">${BRL.format(r.commission)} <span style="font-size:0.72rem;font-weight:400;color:hsl(var(--text-secondary))">comissão</span></div>
+                            <div style="font-size:0.75rem;color:hsl(var(--text-secondary))">Repasse: ${BRL.format(r.ownerAmount)}</div>
+                        </div>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:0.3"><polyline points="9 18 15 12 9 6"/></svg>
                     </div></a>
                 `).join('');

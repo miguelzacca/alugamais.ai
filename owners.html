@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proprietários — AlugaMais</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/global.css">
+    <style>
+        .owner-card {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 1.25rem; align-items: center;
+            padding: 1.1rem 1.5rem; border-bottom: 1px solid var(--glass-border);
+            transition: background var(--transition-speed);
+        }
+        .owner-card:last-child { border-bottom: none; }
+        .owner-card:hover { background: var(--glass-bg); }
+        .owner-avatar {
+            width: 44px; height: 44px; border-radius: 50%;
+            background: linear-gradient(135deg, hsl(38,90%,55%), hsl(25,85%,50%));
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 1rem; color: white; flex-shrink: 0;
+        }
+        .owner-info h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.2rem; }
+        .owner-info p { font-size: 0.8rem; color: hsl(var(--text-secondary)); }
+        .owner-meta { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: flex-end; }
+        .owner-meta-item { text-align: right; }
+        .owner-meta-item .label { font-size: 0.7rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; color: hsl(var(--text-muted)); }
+        .owner-meta-item .value { font-size: 0.9rem; font-weight: 700; }
+
+        .modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:1000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.2s; }
+        .modal-overlay.open { opacity:1;pointer-events:all; }
+        .modal { background:hsl(var(--surface-color));border:1px solid var(--glass-border);border-radius:var(--radius-xl);padding:2rem;width:100%;max-width:540px;box-shadow:var(--shadow-lg);transform:translateY(20px);transition:transform 0.2s; }
+        .modal-overlay.open .modal { transform:translateY(0); }
+        .modal-header { display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem; }
+        .modal-title { font-size:1.05rem;font-weight:700; }
+        .modal-close { background:none;border:none;color:hsl(var(--text-secondary));font-size:1.3rem;cursor:pointer; }
+    </style>
+</head>
+<body>
+<div class="app-layout">
+    <aside class="sidebar">
+        <div class="sidebar-logo"><div class="sidebar-logo-mark">A+</div>AlugaMais</div>
+        <span class="sidebar-section-label">Menu</span>
+        <nav>
+            <a href="/dashboard.html" class="nav-link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Painel</a>
+            <a href="/properties.html" class="nav-link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Imóveis</a>
+            <a href="/owners.html" class="nav-link active"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Proprietários</a>
+            <a href="/tenants.html" class="nav-link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>Inquilinos</a>
+            <a href="/charges.html" class="nav-link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Cobranças</a>
+            <a href="/payments.html" class="nav-link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Pagamentos</a>
+            <a href="/reports.html" class="nav-link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Relatórios</a>
+        </nav>
+        <div class="sidebar-footer"><button class="logout-btn" onclick="logout()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Sair</button></div>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Proprietários</h1>
+                <p class="page-subtitle">Clientes da imobiliária — donos dos imóveis gerenciados</p>
+            </div>
+            <button class="btn btn-primary" onclick="openModal()">+ Novo Proprietário</button>
+        </div>
+
+        <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));margin-bottom:1.5rem">
+            <div class="stat-card glass-panel"><div class="stat-label">Total</div><div class="stat-value" id="s-total">—</div></div>
+            <div class="stat-card glass-panel"><div class="stat-label">Imóveis Gerenciados</div><div class="stat-value" id="s-props">—</div></div>
+            <div class="stat-card glass-panel"><div class="stat-label">Contratos Ativos</div><div class="stat-value text-success" id="s-rentals">—</div></div>
+            <div class="stat-card glass-panel"><div class="stat-label">Comissão Total/mês</div><div class="stat-value" id="s-commission">—</div></div>
+            <div class="stat-card glass-panel"><div class="stat-label">Repasse Total/mês</div><div class="stat-value text-muted" id="s-repasse">—</div></div>
+        </div>
+
+        <div class="glass-panel" style="overflow:hidden" id="owners-list">
+            <div style="text-align:center;padding:3rem;color:hsl(var(--text-secondary))">Carregando...</div>
+        </div>
+    </main>
+</div>
+
+<div class="modal-overlay" id="ownerModal">
+    <div class="modal">
+        <div class="modal-header">
+            <span class="modal-title">Cadastrar Proprietário</span>
+            <button class="modal-close" onclick="closeModal()">×</button>
+        </div>
+        <div class="grid-2">
+            <div class="form-group"><label>Nome Completo *</label><input type="text" id="o-name" class="form-control"></div>
+            <div class="form-group"><label>CPF / CNPJ</label><input type="text" id="o-doc" class="form-control" placeholder="000.000.000-00"></div>
+        </div>
+        <div class="grid-2">
+            <div class="form-group"><label>E-mail</label><input type="email" id="o-email" class="form-control"></div>
+            <div class="form-group"><label>Telefone</label><input type="tel" id="o-phone" class="form-control"></div>
+        </div>
+        <div class="form-group"><label>Chave PIX para Repasse</label><input type="text" id="o-pix" class="form-control" placeholder="CPF, CNPJ, e-mail ou celular"></div>
+        <div class="form-group"><label>Banco</label><input type="text" id="o-bank" class="form-control" placeholder="Ex: Nubank, Itaú"></div>
+        <div class="grid-2">
+            <div class="form-group"><label>Agência</label><input type="text" id="o-agency" class="form-control"></div>
+            <div class="form-group"><label>Conta</label><input type="text" id="o-account" class="form-control"></div>
+        </div>
+        <div style="display:flex;gap:0.75rem;justify-content:flex-end;margin-top:1rem">
+            <button class="btn btn-glass" onclick="closeModal()">Cancelar</button>
+            <button class="btn btn-primary" onclick="save()">💾 Salvar</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script type="module">
+    const token = localStorage.getItem('alugamais_token');
+    if (!token) window.location.href = '/login.html';
+    window.logout = () => { localStorage.removeItem('alugamais_token'); window.location.href = '/login.html'; };
+
+    const BRL = new Intl.NumberFormat('pt-BR', { style:'currency', currency:'BRL' });
+
+    function showToast(msg, type='success') {
+        const c = document.getElementById('toastContainer');
+        const t = document.createElement('div');
+        t.className = `toast toast-${type}`;
+        t.innerHTML = `<span class="toast-icon">${type==='success'?'✓':'✕'}</span>${msg}`;
+        c.appendChild(t);
+        requestAnimationFrame(() => t.classList.add('show'));
+        setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 400); }, 3500);
+    }
+
+    function initials(name) {
+        return name.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
+    }
+
+    window.openModal = () => document.getElementById('ownerModal').classList.add('open');
+    window.closeModal = () => document.getElementById('ownerModal').classList.remove('open');
+
+    window.save = async function() {
+        const name = document.getElementById('o-name').value;
+        if (!name) { showToast('Nome é obrigatório.','error'); return; }
+        try {
+            const res = await fetch('/api/owners', {
+                method:'POST',
+                headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},
+                body: JSON.stringify({
+                    name, document: document.getElementById('o-doc').value,
+                    email: document.getElementById('o-email').value,
+                    phone: document.getElementById('o-phone').value,
+                    bankPixKey: document.getElementById('o-pix').value,
+                    bankName: document.getElementById('o-bank').value,
+                    bankAgency: document.getElementById('o-agency').value,
+                    bankAccount: document.getElementById('o-account').value
+                })
+            });
+            if (!res.ok) throw new Error();
+            closeModal();
+            showToast('Proprietário cadastrado!');
+            load();
+        } catch(e) { showToast('Erro ao salvar.','error'); }
+    };
+
+    async function load() {
+        try {
+            const res = await fetch('/api/owners', { headers: { 'Authorization':`Bearer ${token}` } });
+            if (res.status === 401) return window.logout();
+            const data = await res.json();
+
+            document.getElementById('s-total').textContent = data.length;
+            document.getElementById('s-props').textContent = data.reduce((s,o) => s+o.propertyCount, 0);
+            document.getElementById('s-rentals').textContent = data.reduce((s,o) => s+o.activeRentals, 0);
+            document.getElementById('s-commission').textContent = BRL.format(data.reduce((s,o) => s+o.totalCommission, 0));
+            document.getElementById('s-repasse').textContent = BRL.format(data.reduce((s,o) => s+o.totalOwnerAmount, 0));
+
+            const el = document.getElementById('owners-list');
+            if (data.length === 0) {
+                el.innerHTML = `<div class="empty-state"><div class="empty-state-icon">👤</div><h3>Nenhum proprietário cadastrado</h3><p>Adicione os proprietários dos imóveis que você gerencia.</p><button class="btn btn-primary" onclick="openModal()">+ Cadastrar</button></div>`;
+                return;
+            }
+
+            el.innerHTML = data.map(o => `
+                <div class="owner-card">
+                    <div class="owner-avatar">${initials(o.name)}</div>
+                    <div class="owner-info">
+                        <h4>${o.name}</h4>
+                        <p>${o.document ? o.document + ' · ' : ''}${o.email || ''} ${o.phone ? '· ' + o.phone : ''}</p>
+                        <p>${o.propertyCount} imóvel(is) · ${o.activeRentals} contrato(s) ativo(s)${o.bankPixKey ? ' · PIX: ' + o.bankPixKey : ''}</p>
+                    </div>
+                    <div class="owner-meta">
+                        <div class="owner-meta-item">
+                            <div class="label">Aluguel Total</div>
+                            <div class="value">${BRL.format(o.totalRent)}</div>
+                        </div>
+                        <div class="owner-meta-item" style="color:hsl(var(--primary-color))">
+                            <div class="label">Comissão Imob</div>
+                            <div class="value">${BRL.format(o.totalCommission)}</div>
+                        </div>
+                        <div class="owner-meta-item" style="color:hsl(var(--success))">
+                            <div class="label">Repasse ao Prop.</div>
+                            <div class="value">${BRL.format(o.totalOwnerAmount)}</div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        } catch(e) {
+            document.getElementById('owners-list').innerHTML = '<div class="empty-state"><p>⚠️ Erro ao carregar.</p></div>';
+        }
+    }
+    load();
+</script>
+</body>
+</html>

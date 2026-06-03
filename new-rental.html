@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastrar Aluguel — AlugaMais</title>
+    <title>Novo Contrato — AlugaMais</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/global.css">
     <style>
-        .form-page { max-width: 860px; margin: 0 auto; padding: 2.5rem 1.5rem; }
+        .form-page { max-width: 900px; margin: 0 auto; padding: 2.5rem 1.5rem; }
         .form-header { display:flex; align-items:center; gap:1rem; margin-bottom:2rem; }
         .form-section { padding: 2rem; margin-bottom: 1.5rem; }
         .form-section h2 {
@@ -19,19 +19,35 @@
             color: white; border-radius: 50%; display:flex; align-items:center;
             justify-content: center; font-size: 0.75rem; font-weight: 800; flex-shrink:0;
         }
+        /* Commission preview box */
+        .commission-preview {
+            background: hsla(var(--primary-color)/0.08);
+            border: 1px solid hsla(var(--primary-color)/0.2);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            margin-top: 1rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1rem;
+        }
+        .commission-preview-item { text-align: center; }
+        .commission-preview-item .label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: hsl(var(--text-secondary)); font-weight: 600; margin-bottom: 0.3rem; }
+        .commission-preview-item .value { font-size: 1.2rem; font-weight: 700; }
+        .commission-preview-item.highlight .value { color: hsl(var(--primary-color)); }
+
         .fee-row { display:flex; gap:0.75rem; margin-bottom:0.75rem; align-items:center; }
         .fee-row .form-control { flex:1; }
-        .remove-fee {
-            background:none; border:none; color:hsl(var(--danger)); font-size:1.2rem;
-            padding:0 0.5rem; border-radius:var(--radius-sm); transition:background var(--transition-speed);
-            flex-shrink:0;
-        }
+        .remove-fee { background:none; border:none; color:hsl(var(--danger)); font-size:1.2rem; padding:0 0.5rem; border-radius:var(--radius-sm); transition:background var(--transition-speed); flex-shrink:0; }
         .remove-fee:hover { background: hsla(var(--danger-dim)); }
         .actions { display:flex; justify-content:flex-end; gap:1rem; margin-top:1rem; }
         .fees-box { border:1px solid var(--glass-border); border-radius:var(--radius-md); padding:1.25rem; margin-top:0.5rem; }
         .fees-box-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; }
         .fees-box-header h3 { font-size:0.9rem; font-weight:600; color:hsl(var(--text-secondary)); }
         select.form-control option { background: hsl(222 25% 12%); }
+
+        .owner-select-wrap { display:flex; gap:0.75rem; align-items:flex-end; }
+        .owner-select-wrap .form-group { flex:1; margin-bottom:0; }
+        .info-box { background: hsla(var(--info-dim)); border: 1px solid hsla(var(--info)/0.2); border-radius: var(--radius-md); padding: 0.75rem 1rem; font-size: 0.82rem; color: hsl(var(--info)); margin-bottom: 1rem; }
     </style>
 </head>
 <body style="background-color:hsl(var(--bg-color))">
@@ -39,15 +55,30 @@
     <div class="form-header">
         <a href="/dashboard.html" class="btn btn-glass btn-sm">← Voltar</a>
         <div>
-            <h1 style="font-size:1.5rem;font-weight:700;letter-spacing:-0.03em">Cadastrar Novo Aluguel</h1>
-            <p style="color:hsl(var(--text-secondary));font-size:0.9rem">Preencha os dados do imóvel, inquilino e contrato.</p>
+            <h1 style="font-size:1.5rem;font-weight:700;letter-spacing:-0.03em">Cadastrar Novo Contrato</h1>
+            <p style="color:hsl(var(--text-secondary));font-size:0.9rem">Imóvel, inquilino, comissão e dados do contrato.</p>
         </div>
     </div>
 
     <form id="rentalForm">
-        <!-- 1. Imóvel -->
+        <!-- 1. Proprietário -->
         <div class="glass-panel form-section">
-            <h2><span class="step-number">1</span> Dados do Imóvel</h2>
+            <h2><span class="step-number">1</span> Proprietário do Imóvel</h2>
+            <div class="info-box">🏢 O proprietário é o cliente da sua imobiliária — a pessoa que receberá o repasse após a sua comissão.</div>
+            <div class="owner-select-wrap">
+                <div class="form-group">
+                    <label>Selecionar Proprietário Cadastrado</label>
+                    <select id="ownerId" class="form-control">
+                        <option value="">-- Sem proprietário cadastrado --</option>
+                    </select>
+                </div>
+                <button type="button" class="btn btn-glass btn-sm" onclick="openAddOwner()" style="white-space:nowrap;height:42px">+ Novo Proprietário</button>
+            </div>
+        </div>
+
+        <!-- 2. Imóvel -->
+        <div class="glass-panel form-section">
+            <h2><span class="step-number">2</span> Dados do Imóvel</h2>
             <div class="form-group">
                 <label>Endereço Completo *</label>
                 <input type="text" id="address" class="form-control" required placeholder="Ex: Rua das Flores, 123 - Apto 402">
@@ -70,26 +101,26 @@
             <div class="grid-3">
                 <div class="form-group">
                     <label>Área (m²)</label>
-                    <input type="number" step="0.01" id="area" class="form-control" placeholder="Ex: 65">
+                    <input type="number" step="0.01" id="area" class="form-control" placeholder="65">
                 </div>
                 <div class="form-group">
                     <label>Quartos</label>
-                    <input type="number" id="bedrooms" class="form-control" placeholder="Ex: 2" min="0">
+                    <input type="number" id="bedrooms" class="form-control" placeholder="2" min="0">
                 </div>
                 <div class="form-group">
                     <label>Banheiros</label>
-                    <input type="number" id="bathrooms" class="form-control" placeholder="Ex: 1" min="0">
+                    <input type="number" id="bathrooms" class="form-control" placeholder="1" min="0">
                 </div>
             </div>
         </div>
 
-        <!-- 2. Inquilino -->
+        <!-- 3. Inquilino -->
         <div class="glass-panel form-section">
-            <h2><span class="step-number">2</span> Inquilino</h2>
+            <h2><span class="step-number">3</span> Inquilino</h2>
             <div class="grid-2">
                 <div class="form-group">
                     <label>Nome Completo *</label>
-                    <input type="text" id="tenantName" class="form-control" required placeholder="Nome do inquilino">
+                    <input type="text" id="tenantName" class="form-control" required>
                 </div>
                 <div class="form-group">
                     <label>CPF / CNPJ</label>
@@ -102,29 +133,76 @@
                     <input type="email" id="tenantEmail" class="form-control" placeholder="inquilino@email.com">
                 </div>
                 <div class="form-group">
-                    <label>Telefone / WhatsApp</label>
+                    <label>Telefone</label>
                     <input type="tel" id="tenantPhone" class="form-control" placeholder="(11) 99999-9999">
                 </div>
             </div>
         </div>
 
-        <!-- 3. Contrato -->
+        <!-- 4. Comissão da Imobiliária -->
         <div class="glass-panel form-section">
-            <h2><span class="step-number">3</span> Contrato</h2>
+            <h2><span class="step-number">4</span> Comissão da Imobiliária</h2>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Valor Base do Aluguel (R$) *</label>
+                    <input type="number" step="0.01" id="baseRent" class="form-control" required placeholder="1500.00" oninput="updatePreview()">
+                </div>
+                <div class="form-group">
+                    <label>Tipo de Comissão</label>
+                    <select id="commissionType" class="form-control" onchange="toggleCommissionType(); updatePreview()">
+                        <option value="percentage">Percentual (%)</option>
+                        <option value="fixed">Valor Fixo (R$)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label id="commissionRateLabel">Taxa de Comissão (%)</label>
+                    <input type="number" step="0.1" id="commissionRate" class="form-control" value="10" min="0" max="100" oninput="updatePreview()" placeholder="10">
+                </div>
+                <div class="form-group">
+                    <label>Taxa de Administração Mensal (R$)</label>
+                    <input type="number" step="0.01" id="administrationFee" class="form-control" value="0" min="0" oninput="updatePreview()" placeholder="0">
+                </div>
+            </div>
+            <!-- Live preview -->
+            <div class="commission-preview" id="commissionPreview">
+                <div class="commission-preview-item">
+                    <div class="label">Aluguel Bruto</div>
+                    <div class="value" id="prev-gross">R$ 0,00</div>
+                </div>
+                <div class="commission-preview-item highlight">
+                    <div class="label">💰 Comissão Imobiliária</div>
+                    <div class="value" id="prev-commission">R$ 0,00</div>
+                </div>
+                <div class="commission-preview-item">
+                    <div class="label">📤 Repasse ao Proprietário</div>
+                    <div class="value" id="prev-owner">R$ 0,00</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Contrato -->
+        <div class="glass-panel form-section">
+            <h2><span class="step-number">5</span> Contrato</h2>
             <div class="grid-2">
                 <div class="form-group">
                     <label>Data de Entrada *</label>
                     <input type="date" id="moveInDate" class="form-control" required>
                 </div>
                 <div class="form-group">
-                    <label>Data de Término (Opcional)</label>
+                    <label>Data de Término</label>
                     <input type="date" id="contractEndDate" class="form-control">
                 </div>
             </div>
             <div class="grid-3">
                 <div class="form-group">
-                    <label>Dia do Vencimento *</label>
+                    <label>Dia Vencimento (Inquilino) *</label>
                     <input type="number" id="dueDateDay" class="form-control" min="1" max="31" required placeholder="5">
+                </div>
+                <div class="form-group">
+                    <label>Dia Repasse (Proprietário)</label>
+                    <input type="number" id="ownerPaymentDay" class="form-control" min="1" max="31" value="10" placeholder="10">
                 </div>
                 <div class="form-group">
                     <label>Garantia</label>
@@ -136,52 +214,88 @@
                         <option value="capitalization">Título Capitalização</option>
                     </select>
                 </div>
+            </div>
+            <div class="grid-2">
                 <div class="form-group">
                     <label>Índice de Reajuste</label>
-                    <select id="indexType" class="form-control">
+                    <select id="indexType" class="form-control" onchange="toggleIndexRate()">
                         <option value="none">Sem reajuste</option>
                         <option value="igpm">IGP-M</option>
                         <option value="ipca">IPCA</option>
                         <option value="fixed">Taxa Fixa</option>
                     </select>
                 </div>
-            </div>
-            <div class="form-group" id="indexRateGroup" style="display:none">
-                <label>Taxa de Reajuste Anual (%)</label>
-                <input type="number" step="0.01" id="indexRate" class="form-control" placeholder="Ex: 3.5">
+                <div class="form-group" id="indexRateGroup" style="display:none">
+                    <label>Taxa Anual (%)</label>
+                    <input type="number" step="0.01" id="indexRate" class="form-control" placeholder="3.5">
+                </div>
             </div>
         </div>
 
-        <!-- 4. Valores -->
+        <!-- 6. Taxas Adicionais -->
         <div class="glass-panel form-section">
-            <h2><span class="step-number">4</span> Valores e Taxas</h2>
-            <div class="form-group">
-                <label>Valor Base do Aluguel (R$) *</label>
-                <input type="number" step="0.01" id="baseRent" class="form-control" required placeholder="1500.00">
-            </div>
+            <h2><span class="step-number">6</span> Taxas Adicionais</h2>
             <div class="fees-box">
                 <div class="fees-box-header">
-                    <h3>Taxas Adicionais</h3>
-                    <button type="button" class="btn btn-glass btn-sm" onclick="addFeeRow()">+ Adicionar Taxa</button>
+                    <h3>Condomínio, IPTU, Água, Luz, etc.</h3>
+                    <button type="button" class="btn btn-glass btn-sm" onclick="addFeeRow()">+ Adicionar</button>
                 </div>
-                <div id="feesList"><p class="text-sm text-muted">Nenhuma taxa adicional cadastrada.</p></div>
+                <div id="feesList"><p class="text-sm text-muted">Nenhuma taxa adicional.</p></div>
             </div>
         </div>
 
-        <!-- 5. Observações -->
+        <!-- 7. Observações -->
         <div class="glass-panel form-section">
-            <h2><span class="step-number">5</span> Observações</h2>
+            <h2><span class="step-number">7</span> Observações</h2>
             <div class="form-group">
-                <label>Notas sobre o contrato</label>
-                <textarea id="notes" class="form-control" rows="3" placeholder="Informações adicionais, cláusulas especiais, etc..."></textarea>
+                <label>Notas internas sobre o contrato</label>
+                <textarea id="notes" class="form-control" rows="3" placeholder="Observações, cláusulas especiais, informações adicionais..."></textarea>
             </div>
         </div>
 
         <div class="actions">
             <a href="/dashboard.html" class="btn btn-glass">Cancelar</a>
-            <button type="submit" class="btn btn-primary" id="submitBtn">💾 Salvar Aluguel</button>
+            <button type="submit" class="btn btn-primary" id="submitBtn">💾 Salvar Contrato</button>
         </div>
     </form>
+</div>
+
+<!-- Add Owner Modal -->
+<div class="modal-overlay" id="ownerModal">
+    <div class="modal">
+        <div class="modal-header">
+            <span class="modal-title">Cadastrar Proprietário</span>
+            <button class="modal-close" onclick="closeOwnerModal()">×</button>
+        </div>
+        <div class="grid-2">
+            <div class="form-group">
+                <label>Nome Completo *</label>
+                <input type="text" id="o-name" class="form-control" placeholder="Nome do proprietário">
+            </div>
+            <div class="form-group">
+                <label>CPF / CNPJ</label>
+                <input type="text" id="o-doc" class="form-control" placeholder="000.000.000-00">
+            </div>
+        </div>
+        <div class="grid-2">
+            <div class="form-group">
+                <label>E-mail</label>
+                <input type="email" id="o-email" class="form-control">
+            </div>
+            <div class="form-group">
+                <label>Telefone</label>
+                <input type="tel" id="o-phone" class="form-control">
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Chave PIX (para repasse)</label>
+            <input type="text" id="o-pix" class="form-control" placeholder="CPF, CNPJ, e-mail ou celular">
+        </div>
+        <div style="display:flex;gap:0.75rem;justify-content:flex-end;margin-top:1rem">
+            <button class="btn btn-glass" onclick="closeOwnerModal()">Cancelar</button>
+            <button class="btn btn-primary" onclick="saveOwner()">💾 Salvar Proprietário</button>
+        </div>
+    </div>
 </div>
 
 <div class="toast-container" id="toastContainer"></div>
@@ -190,42 +304,94 @@
     const token = localStorage.getItem('alugamais_token');
     if (!token) window.location.href = '/login.html';
 
-    // Index rate toggle
-    document.getElementById('indexType').addEventListener('change', function() {
-        document.getElementById('indexRateGroup').style.display = this.value === 'fixed' ? 'block' : 'none';
-    });
+    const BRL = new Intl.NumberFormat('pt-BR', { style:'currency', currency:'BRL' });
 
+    // Load owners for select
+    async function loadOwners(selectedId = null) {
+        try {
+            const res = await fetch('/api/owners', { headers: { 'Authorization':`Bearer ${token}` } });
+            const owners = await res.json();
+            const sel = document.getElementById('ownerId');
+            sel.innerHTML = '<option value="">-- Selecionar Proprietário --</option>' +
+                owners.map(o => `<option value="${o.id}" ${o.id === selectedId ? 'selected' : ''}>${o.name}${o.document ? ` (${o.document})` : ''}</option>`).join('');
+        } catch(e) { console.error('Error loading owners', e); }
+    }
+    loadOwners();
+
+    // Commission preview
+    window.updatePreview = function() {
+        const base = parseFloat(document.getElementById('baseRent').value) || 0;
+        const rate = parseFloat(document.getElementById('commissionRate').value) || 0;
+        const adminFee = parseFloat(document.getElementById('administrationFee').value) || 0;
+        const type = document.getElementById('commissionType').value;
+        const commissionAmount = type === 'percentage' ? base * (rate / 100) : rate;
+        const totalCommission = commissionAmount + adminFee;
+        const ownerAmount = base - totalCommission;
+        document.getElementById('prev-gross').textContent = BRL.format(base);
+        document.getElementById('prev-commission').textContent = BRL.format(totalCommission);
+        document.getElementById('prev-owner').textContent = BRL.format(Math.max(ownerAmount, 0));
+    };
+
+    window.toggleCommissionType = function() {
+        const type = document.getElementById('commissionType').value;
+        document.getElementById('commissionRateLabel').textContent = type === 'percentage' ? 'Taxa de Comissão (%)' : 'Valor Fixo (R$)';
+    };
+
+    window.toggleIndexRate = function() {
+        document.getElementById('indexRateGroup').style.display =
+            document.getElementById('indexType').value === 'fixed' ? 'block' : 'none';
+    };
+
+    // Owner modal
+    window.openAddOwner = () => document.getElementById('ownerModal').classList.add('open');
+    window.closeOwnerModal = () => document.getElementById('ownerModal').classList.remove('open');
+
+    window.saveOwner = async function() {
+        const name = document.getElementById('o-name').value;
+        if (!name) { showToast('Nome é obrigatório.', 'error'); return; }
+        try {
+            const res = await fetch('/api/owners', {
+                method: 'POST',
+                headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${token}` },
+                body: JSON.stringify({
+                    name, document: document.getElementById('o-doc').value,
+                    email: document.getElementById('o-email').value,
+                    phone: document.getElementById('o-phone').value,
+                    bankPixKey: document.getElementById('o-pix').value
+                })
+            });
+            const d = await res.json();
+            if (!res.ok) throw new Error(d.error);
+            closeOwnerModal();
+            showToast('Proprietário cadastrado!');
+            await loadOwners(d.id);
+        } catch(e) { showToast('Erro ao salvar proprietário.', 'error'); }
+    };
+
+    // Fees
     window.fees = [];
-
     window.addFeeRow = function() {
         const id = Date.now();
-        window.fees.push({ id, type:'', amount:'', isVariable:false });
+        window.fees.push({ id, type:'', amount:'', paidBy:'tenant', isVariable:false });
         renderFees();
     };
-
-    window.removeFee = function(id) {
-        window.fees = window.fees.filter(f => f.id !== id);
-        renderFees();
-    };
-
-    window.updateFee = function(id, field, value) {
-        const fee = window.fees.find(f => f.id === id);
-        if (fee) fee[field] = field === 'isVariable' ? value === 'true' : value;
-    };
+    window.removeFee = id => { window.fees = window.fees.filter(f => f.id !== id); renderFees(); };
+    window.updateFee = (id, field, value) => { const f = window.fees.find(f => f.id === id); if(f) f[field] = value; };
 
     function renderFees() {
         const el = document.getElementById('feesList');
-        if (window.fees.length === 0) {
-            el.innerHTML = '<p class="text-sm text-muted">Nenhuma taxa adicional cadastrada.</p>';
-            return;
-        }
+        if (window.fees.length === 0) { el.innerHTML = '<p class="text-sm text-muted">Nenhuma taxa adicional.</p>'; return; }
         el.innerHTML = window.fees.map(f => `
             <div class="fee-row">
-                <input type="text" class="form-control" placeholder="Nome (ex: Condomínio)"
+                <input type="text" class="form-control" placeholder="Ex: Condomínio"
                     value="${f.type}" onchange="updateFee(${f.id},'type',this.value)">
-                <input type="number" step="0.01" class="form-control" style="max-width:140px" placeholder="Valor R$"
+                <input type="number" step="0.01" class="form-control" style="max-width:130px" placeholder="R$"
                     value="${f.amount}" onchange="updateFee(${f.id},'amount',this.value)">
-                <select class="form-control" style="max-width:130px" onchange="updateFee(${f.id},'isVariable',this.value)">
+                <select class="form-control" style="max-width:160px" onchange="updateFee(${f.id},'paidBy',this.value)">
+                    <option value="tenant">Pago pelo Inquilino</option>
+                    <option value="owner">Pago pelo Proprietário</option>
+                </select>
+                <select class="form-control" style="max-width:120px" onchange="updateFee(${f.id},'isVariable',this.value==='true')">
                     <option value="false">Fixo</option>
                     <option value="true">Variável</option>
                 </select>
@@ -241,16 +407,16 @@
         t.innerHTML = `<span class="toast-icon">${type==='success'?'✓':'✕'}</span>${msg}`;
         c.appendChild(t);
         requestAnimationFrame(() => t.classList.add('show'));
-        setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 400); }, 3000);
+        setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 400); }, 3500);
     }
 
     document.getElementById('rentalForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const btn = document.getElementById('submitBtn');
-        btn.disabled = true;
-        btn.textContent = 'Salvando...';
+        btn.disabled = true; btn.textContent = 'Salvando...';
 
         const payload = {
+            ownerId: document.getElementById('ownerId').value || null,
             address: document.getElementById('address').value,
             buildingName: document.getElementById('buildingName').value,
             propertyType: document.getElementById('propertyType').value,
@@ -262,32 +428,32 @@
             tenantEmail: document.getElementById('tenantEmail').value,
             tenantPhone: document.getElementById('tenantPhone').value,
             baseRentAmount: document.getElementById('baseRent').value,
+            commissionType: document.getElementById('commissionType').value,
+            commissionRate: document.getElementById('commissionRate').value,
+            administrationFee: document.getElementById('administrationFee').value,
             moveInDate: document.getElementById('moveInDate').value,
             contractEndDate: document.getElementById('contractEndDate').value,
             dueDateDay: document.getElementById('dueDateDay').value,
+            ownerPaymentDay: document.getElementById('ownerPaymentDay').value,
             indexType: document.getElementById('indexType').value,
             indexRate: document.getElementById('indexRate').value,
             guaranteeType: document.getElementById('guaranteeType').value,
             notes: document.getElementById('notes').value,
-            fees: window.fees.map(f => ({ feeType: f.type, amount: f.amount, isVariable: f.isVariable }))
+            fees: window.fees.map(f => ({ feeType: f.type, amount: f.amount, paidBy: f.paidBy, isVariable: f.isVariable }))
         };
 
         try {
             const res = await fetch('/api/rentals', {
-                method:'POST',
-                headers:{ 'Content-Type':'application/json', 'Authorization':`Bearer ${token}` },
+                method: 'POST',
+                headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${token}` },
                 body: JSON.stringify(payload)
             });
-            if (!res.ok) {
-                const d = await res.json();
-                throw new Error(d.error || 'Erro ao salvar');
-            }
-            showToast('Aluguel cadastrado com sucesso!');
+            if (!res.ok) { const d = await res.json(); throw new Error(d.error || 'Erro'); }
+            showToast('Contrato cadastrado com sucesso!');
             setTimeout(() => window.location.href = '/dashboard.html', 1500);
         } catch(err) {
-            showToast(err.message || 'Erro ao salvar o aluguel.', 'error');
-            btn.disabled = false;
-            btn.textContent = '💾 Salvar Aluguel';
+            showToast(err.message || 'Erro ao salvar.', 'error');
+            btn.disabled = false; btn.textContent = '💾 Salvar Contrato';
         }
     });
 </script>
