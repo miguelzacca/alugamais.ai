@@ -3,278 +3,293 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Novo Aluguel - AlugaMais</title>
+    <title>Cadastrar Aluguel — AlugaMais</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/global.css">
     <style>
-        .page-container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 3rem 1rem;
+        .form-page { max-width: 860px; margin: 0 auto; padding: 2.5rem 1.5rem; }
+        .form-header { display:flex; align-items:center; gap:1rem; margin-bottom:2rem; }
+        .form-section { padding: 2rem; margin-bottom: 1.5rem; }
+        .form-section h2 {
+            font-size: 1rem; font-weight: 700; color: hsl(var(--primary-color));
+            margin-bottom: 1.5rem; display:flex; align-items:center; gap:0.5rem;
         }
-
-        .header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 2rem;
-            gap: 1rem;
+        .step-number {
+            width: 24px; height: 24px; background: hsl(var(--primary-color));
+            color: white; border-radius: 50%; display:flex; align-items:center;
+            justify-content: center; font-size: 0.75rem; font-weight: 800; flex-shrink:0;
         }
-
-        .form-section {
-            padding: 2rem;
-            margin-bottom: 1.5rem;
-        }
-
-        h2 {
-            margin-bottom: 1.5rem;
-            font-size: 1.2rem;
-            color: hsl(var(--primary-color));
-        }
-
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-        }
-
-        .form-group {
-            margin-bottom: 1rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-size: 0.9rem;
-            color: hsl(var(--text-secondary));
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 0.8rem 1rem;
-            border-radius: var(--radius-md);
-            border: 1px solid var(--glass-border);
-            background-color: rgba(0,0,0,0.2);
-            color: hsl(var(--text-primary));
-            font-family: inherit;
-        }
-        
-        .form-control:focus {
-            outline: none;
-            border-color: hsl(var(--primary-color));
-        }
-
-        .fees-container {
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius-md);
-            padding: 1rem;
-            margin-top: 1rem;
-        }
-
-        .fee-row {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 0.5rem;
-            align-items: center;
-        }
-
-        .fee-row input {
-            flex: 1;
-        }
-
+        .fee-row { display:flex; gap:0.75rem; margin-bottom:0.75rem; align-items:center; }
+        .fee-row .form-control { flex:1; }
         .remove-fee {
-            background: none;
-            border: none;
-            color: hsl(var(--danger));
-            font-size: 1.2rem;
-            cursor: pointer;
-            padding: 0 0.5rem;
+            background:none; border:none; color:hsl(var(--danger)); font-size:1.2rem;
+            padding:0 0.5rem; border-radius:var(--radius-sm); transition:background var(--transition-speed);
+            flex-shrink:0;
         }
-
-        .actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 1rem;
-            margin-top: 2rem;
-        }
-        
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: hsl(var(--success));
-            color: white;
-            padding: 1rem 2rem;
-            border-radius: var(--radius-md);
-            transform: translateY(100px);
-            opacity: 0;
-            transition: all 0.3s ease;
-        }
-        
-        .toast.show {
-            transform: translateY(0);
-            opacity: 1;
-        }
+        .remove-fee:hover { background: hsla(var(--danger-dim)); }
+        .actions { display:flex; justify-content:flex-end; gap:1rem; margin-top:1rem; }
+        .fees-box { border:1px solid var(--glass-border); border-radius:var(--radius-md); padding:1.25rem; margin-top:0.5rem; }
+        .fees-box-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; }
+        .fees-box-header h3 { font-size:0.9rem; font-weight:600; color:hsl(var(--text-secondary)); }
+        select.form-control option { background: hsl(222 25% 12%); }
     </style>
 </head>
-<body>
-    <div class="page-container">
-        <div class="header">
-            <a href="/dashboard.html" class="btn btn-glass">← Voltar</a>
-            <h1>Cadastrar Novo Aluguel</h1>
+<body style="background-color:hsl(var(--bg-color))">
+<div class="form-page">
+    <div class="form-header">
+        <a href="/dashboard.html" class="btn btn-glass btn-sm">← Voltar</a>
+        <div>
+            <h1 style="font-size:1.5rem;font-weight:700;letter-spacing:-0.03em">Cadastrar Novo Aluguel</h1>
+            <p style="color:hsl(var(--text-secondary));font-size:0.9rem">Preencha os dados do imóvel, inquilino e contrato.</p>
         </div>
+    </div>
 
-        <form id="rentalForm">
-            <!-- Imóvel -->
-            <div class="glass-panel form-section">
-                <h2>1. Dados do Imóvel</h2>
+    <form id="rentalForm">
+        <!-- 1. Imóvel -->
+        <div class="glass-panel form-section">
+            <h2><span class="step-number">1</span> Dados do Imóvel</h2>
+            <div class="form-group">
+                <label>Endereço Completo *</label>
+                <input type="text" id="address" class="form-control" required placeholder="Ex: Rua das Flores, 123 - Apto 402">
+            </div>
+            <div class="grid-2">
                 <div class="form-group">
-                    <label>Endereço Completo</label>
-                    <input type="text" id="address" class="form-control" required placeholder="Ex: Rua das Flores, 123 - Apto 402">
-                </div>
-                <div class="form-group">
-                    <label>Nome do Edifício / Condomínio (Opcional)</label>
+                    <label>Nome do Edifício / Condomínio</label>
                     <input type="text" id="buildingName" class="form-control" placeholder="Ex: Edifício Sol Nascente">
                 </div>
-            </div>
-
-            <!-- Inquilino -->
-            <div class="glass-panel form-section">
-                <h2>2. Inquilino e Contrato</h2>
-                <div class="grid-2">
-                    <div class="form-group">
-                        <label>Nome do Inquilino</label>
-                        <input type="text" id="tenantName" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label>CPF/CNPJ (Opcional)</label>
-                        <input type="text" id="tenantDocument" class="form-control">
-                    </div>
-                </div>
-                <div class="grid-2">
-                    <div class="form-group">
-                        <label>Data de Entrada</label>
-                        <input type="date" id="moveInDate" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Dia do Vencimento</label>
-                        <input type="number" id="dueDateDay" class="form-control" min="1" max="31" required placeholder="Ex: 5">
-                    </div>
-                </div>
-            </div>
-
-            <!-- Valores e Taxas -->
-            <div class="glass-panel form-section">
-                <h2>3. Valores e Taxas</h2>
                 <div class="form-group">
-                    <label>Valor Base do Aluguel (R$)</label>
-                    <input type="number" step="0.01" id="baseRent" class="form-control" required placeholder="1500.00">
-                </div>
-
-                <div class="fees-container">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
-                        <h3>Taxas Adicionais (Condomínio, IPTU, etc)</h3>
-                        <button type="button" class="btn btn-glass" onclick="addFeeRow()">+ Adicionar Taxa</button>
-                    </div>
-                    <div id="feesList">
-                        <!-- Fee rows inserted here -->
-                    </div>
+                    <label>Tipo do Imóvel</label>
+                    <select id="propertyType" class="form-control">
+                        <option value="apartment">🏢 Apartamento</option>
+                        <option value="house">🏡 Casa</option>
+                        <option value="commercial">🏪 Comercial</option>
+                        <option value="land">🌿 Terreno</option>
+                    </select>
                 </div>
             </div>
-
-            <div class="actions">
-                <a href="/dashboard.html" class="btn btn-glass">Cancelar</a>
-                <button type="submit" class="btn btn-primary" id="submitBtn">Salvar Aluguel</button>
-            </div>
-        </form>
-    </div>
-    
-    <div id="toast" class="toast">Aluguel cadastrado com sucesso!</div>
-
-    <script type="module">
-        const token = localStorage.getItem('alugamais_token');
-        if (!token) window.location.href = '/login.html';
-
-        window.fees = [];
-
-        window.addFeeRow = function() {
-            const id = Date.now();
-            window.fees.push({ id, type: '', amount: '' });
-            renderFees();
-        }
-
-        window.removeFee = function(id) {
-            window.fees = window.fees.filter(f => f.id !== id);
-            renderFees();
-        }
-
-        window.updateFee = function(id, field, value) {
-            const fee = window.fees.find(f => f.id === id);
-            if(fee) fee[field] = value;
-        }
-
-        function renderFees() {
-            const container = document.getElementById('feesList');
-            if (window.fees.length === 0) {
-                container.innerHTML = '<p style="color: gray; font-size: 0.9rem;">Nenhuma taxa adicional.</p>';
-                return;
-            }
-
-            container.innerHTML = window.fees.map(f => `
-                <div class="fee-row">
-                    <input type="text" class="form-control" placeholder="Nome (Ex: Condomínio)" 
-                           value="${f.type}" onchange="updateFee(${f.id}, 'type', this.value)" required>
-                    <input type="number" step="0.01" class="form-control" placeholder="Valor (R$)" 
-                           value="${f.amount}" onchange="updateFee(${f.id}, 'amount', this.value)" required>
-                    <button type="button" class="remove-fee" onclick="removeFee(${f.id})">×</button>
+            <div class="grid-3">
+                <div class="form-group">
+                    <label>Área (m²)</label>
+                    <input type="number" step="0.01" id="area" class="form-control" placeholder="Ex: 65">
                 </div>
-            `).join('');
-        }
+                <div class="form-group">
+                    <label>Quartos</label>
+                    <input type="number" id="bedrooms" class="form-control" placeholder="Ex: 2" min="0">
+                </div>
+                <div class="form-group">
+                    <label>Banheiros</label>
+                    <input type="number" id="bathrooms" class="form-control" placeholder="Ex: 1" min="0">
+                </div>
+            </div>
+        </div>
 
+        <!-- 2. Inquilino -->
+        <div class="glass-panel form-section">
+            <h2><span class="step-number">2</span> Inquilino</h2>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Nome Completo *</label>
+                    <input type="text" id="tenantName" class="form-control" required placeholder="Nome do inquilino">
+                </div>
+                <div class="form-group">
+                    <label>CPF / CNPJ</label>
+                    <input type="text" id="tenantDocument" class="form-control" placeholder="000.000.000-00">
+                </div>
+            </div>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>E-mail</label>
+                    <input type="email" id="tenantEmail" class="form-control" placeholder="inquilino@email.com">
+                </div>
+                <div class="form-group">
+                    <label>Telefone / WhatsApp</label>
+                    <input type="tel" id="tenantPhone" class="form-control" placeholder="(11) 99999-9999">
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Contrato -->
+        <div class="glass-panel form-section">
+            <h2><span class="step-number">3</span> Contrato</h2>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Data de Entrada *</label>
+                    <input type="date" id="moveInDate" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Data de Término (Opcional)</label>
+                    <input type="date" id="contractEndDate" class="form-control">
+                </div>
+            </div>
+            <div class="grid-3">
+                <div class="form-group">
+                    <label>Dia do Vencimento *</label>
+                    <input type="number" id="dueDateDay" class="form-control" min="1" max="31" required placeholder="5">
+                </div>
+                <div class="form-group">
+                    <label>Garantia</label>
+                    <select id="guaranteeType" class="form-control">
+                        <option value="none">Nenhuma</option>
+                        <option value="deposit">Depósito Caução</option>
+                        <option value="surety">Fiador</option>
+                        <option value="insurance">Seguro Fiança</option>
+                        <option value="capitalization">Título Capitalização</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Índice de Reajuste</label>
+                    <select id="indexType" class="form-control">
+                        <option value="none">Sem reajuste</option>
+                        <option value="igpm">IGP-M</option>
+                        <option value="ipca">IPCA</option>
+                        <option value="fixed">Taxa Fixa</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group" id="indexRateGroup" style="display:none">
+                <label>Taxa de Reajuste Anual (%)</label>
+                <input type="number" step="0.01" id="indexRate" class="form-control" placeholder="Ex: 3.5">
+            </div>
+        </div>
+
+        <!-- 4. Valores -->
+        <div class="glass-panel form-section">
+            <h2><span class="step-number">4</span> Valores e Taxas</h2>
+            <div class="form-group">
+                <label>Valor Base do Aluguel (R$) *</label>
+                <input type="number" step="0.01" id="baseRent" class="form-control" required placeholder="1500.00">
+            </div>
+            <div class="fees-box">
+                <div class="fees-box-header">
+                    <h3>Taxas Adicionais</h3>
+                    <button type="button" class="btn btn-glass btn-sm" onclick="addFeeRow()">+ Adicionar Taxa</button>
+                </div>
+                <div id="feesList"><p class="text-sm text-muted">Nenhuma taxa adicional cadastrada.</p></div>
+            </div>
+        </div>
+
+        <!-- 5. Observações -->
+        <div class="glass-panel form-section">
+            <h2><span class="step-number">5</span> Observações</h2>
+            <div class="form-group">
+                <label>Notas sobre o contrato</label>
+                <textarea id="notes" class="form-control" rows="3" placeholder="Informações adicionais, cláusulas especiais, etc..."></textarea>
+            </div>
+        </div>
+
+        <div class="actions">
+            <a href="/dashboard.html" class="btn btn-glass">Cancelar</a>
+            <button type="submit" class="btn btn-primary" id="submitBtn">💾 Salvar Aluguel</button>
+        </div>
+    </form>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script type="module">
+    const token = localStorage.getItem('alugamais_token');
+    if (!token) window.location.href = '/login.html';
+
+    // Index rate toggle
+    document.getElementById('indexType').addEventListener('change', function() {
+        document.getElementById('indexRateGroup').style.display = this.value === 'fixed' ? 'block' : 'none';
+    });
+
+    window.fees = [];
+
+    window.addFeeRow = function() {
+        const id = Date.now();
+        window.fees.push({ id, type:'', amount:'', isVariable:false });
         renderFees();
+    };
 
-        document.getElementById('rentalForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('submitBtn');
-            btn.disabled = true;
-            btn.textContent = 'Salvando...';
+    window.removeFee = function(id) {
+        window.fees = window.fees.filter(f => f.id !== id);
+        renderFees();
+    };
 
-            const payload = {
-                address: document.getElementById('address').value,
-                buildingName: document.getElementById('buildingName').value,
-                tenantName: document.getElementById('tenantName').value,
-                tenantDocument: document.getElementById('tenantDocument').value,
-                baseRentAmount: document.getElementById('baseRent').value,
-                moveInDate: document.getElementById('moveInDate').value,
-                dueDateDay: document.getElementById('dueDateDay').value,
-                fees: window.fees.map(f => ({ feeType: f.type, amount: f.amount, isVariable: false }))
-            };
+    window.updateFee = function(id, field, value) {
+        const fee = window.fees.find(f => f.id === id);
+        if (fee) fee[field] = field === 'isVariable' ? value === 'true' : value;
+    };
 
-            try {
-                const res = await fetch('/api/rentals', {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify(payload)
-                });
+    function renderFees() {
+        const el = document.getElementById('feesList');
+        if (window.fees.length === 0) {
+            el.innerHTML = '<p class="text-sm text-muted">Nenhuma taxa adicional cadastrada.</p>';
+            return;
+        }
+        el.innerHTML = window.fees.map(f => `
+            <div class="fee-row">
+                <input type="text" class="form-control" placeholder="Nome (ex: Condomínio)"
+                    value="${f.type}" onchange="updateFee(${f.id},'type',this.value)">
+                <input type="number" step="0.01" class="form-control" style="max-width:140px" placeholder="Valor R$"
+                    value="${f.amount}" onchange="updateFee(${f.id},'amount',this.value)">
+                <select class="form-control" style="max-width:130px" onchange="updateFee(${f.id},'isVariable',this.value)">
+                    <option value="false">Fixo</option>
+                    <option value="true">Variável</option>
+                </select>
+                <button type="button" class="remove-fee" onclick="removeFee(${f.id})">×</button>
+            </div>
+        `).join('');
+    }
 
-                if (!res.ok) throw new Error('Falha ao salvar');
+    function showToast(msg, type='success') {
+        const c = document.getElementById('toastContainer');
+        const t = document.createElement('div');
+        t.className = `toast toast-${type}`;
+        t.innerHTML = `<span class="toast-icon">${type==='success'?'✓':'✕'}</span>${msg}`;
+        c.appendChild(t);
+        requestAnimationFrame(() => t.classList.add('show'));
+        setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 400); }, 3000);
+    }
 
-                // Show toast
-                const toast = document.getElementById('toast');
-                toast.classList.add('show');
-                
-                setTimeout(() => {
-                    window.location.href = '/dashboard.html';
-                }, 1500);
+    document.getElementById('rentalForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.textContent = 'Salvando...';
 
-            } catch (err) {
-                alert('Erro ao salvar o aluguel.');
-                btn.disabled = false;
-                btn.textContent = 'Salvar Aluguel';
+        const payload = {
+            address: document.getElementById('address').value,
+            buildingName: document.getElementById('buildingName').value,
+            propertyType: document.getElementById('propertyType').value,
+            area: document.getElementById('area').value,
+            bedrooms: document.getElementById('bedrooms').value,
+            bathrooms: document.getElementById('bathrooms').value,
+            tenantName: document.getElementById('tenantName').value,
+            tenantDocument: document.getElementById('tenantDocument').value,
+            tenantEmail: document.getElementById('tenantEmail').value,
+            tenantPhone: document.getElementById('tenantPhone').value,
+            baseRentAmount: document.getElementById('baseRent').value,
+            moveInDate: document.getElementById('moveInDate').value,
+            contractEndDate: document.getElementById('contractEndDate').value,
+            dueDateDay: document.getElementById('dueDateDay').value,
+            indexType: document.getElementById('indexType').value,
+            indexRate: document.getElementById('indexRate').value,
+            guaranteeType: document.getElementById('guaranteeType').value,
+            notes: document.getElementById('notes').value,
+            fees: window.fees.map(f => ({ feeType: f.type, amount: f.amount, isVariable: f.isVariable }))
+        };
+
+        try {
+            const res = await fetch('/api/rentals', {
+                method:'POST',
+                headers:{ 'Content-Type':'application/json', 'Authorization':`Bearer ${token}` },
+                body: JSON.stringify(payload)
+            });
+            if (!res.ok) {
+                const d = await res.json();
+                throw new Error(d.error || 'Erro ao salvar');
             }
-        });
-    </script>
+            showToast('Aluguel cadastrado com sucesso!');
+            setTimeout(() => window.location.href = '/dashboard.html', 1500);
+        } catch(err) {
+            showToast(err.message || 'Erro ao salvar o aluguel.', 'error');
+            btn.disabled = false;
+            btn.textContent = '💾 Salvar Aluguel';
+        }
+    });
+</script>
 </body>
 </html>

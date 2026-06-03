@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Imóveis — AlugaMais</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/global.css">
+    <style>
+        .properties-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.25rem;
+        }
+        .property-card {
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--glass-border);
+            background: var(--glass-bg);
+            overflow: hidden;
+            transition: all var(--transition-speed);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+        }
+        .property-card:hover {
+            border-color: var(--glass-border-hover);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+        }
+        .property-card-header {
+            padding: 1.25rem 1.5rem;
+            background: linear-gradient(135deg, hsla(var(--primary-color)/0.12), hsla(var(--accent)/0.06));
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+        .property-type-icon {
+            width: 44px; height: 44px;
+            border-radius: var(--radius-md);
+            background: hsla(var(--primary-color)/0.15);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.3rem; flex-shrink: 0;
+        }
+        .property-card-body { padding: 1.25rem 1.5rem; flex: 1; }
+        .property-card-footer {
+            padding: 0.9rem 1.5rem;
+            border-top: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .property-address { font-size: 0.9rem; font-weight: 600; line-height: 1.4; }
+        .property-building { font-size: 0.78rem; color: hsl(var(--text-secondary)); margin-top: 0.2rem; }
+        .property-meta {
+            display: flex; gap: 1rem; margin-top: 0.8rem; flex-wrap: wrap;
+        }
+        .property-meta-item {
+            display: flex; align-items: center; gap: 0.3rem;
+            font-size: 0.78rem; color: hsl(var(--text-secondary));
+        }
+        .tenant-chip {
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+        .tenant-mini-avatar {
+            width: 26px; height: 26px; border-radius: 50%;
+            background: linear-gradient(135deg, hsl(var(--primary-color)), hsl(var(--accent)));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.65rem; font-weight: 700; color: white;
+        }
+
+        .filter-btn {
+            padding: 0.35rem 1rem; border-radius: 999px;
+            background: var(--glass-bg); border: 1px solid var(--glass-border);
+            color: hsl(var(--text-secondary)); font-size: 0.8rem; font-weight: 500;
+            cursor: pointer; transition: all var(--transition-speed);
+        }
+        .filter-btn.active {
+            background: hsla(var(--primary-color)/0.15);
+            border-color: hsla(var(--primary-color)/0.4);
+            color: hsl(var(--primary-color));
+        }
+        .search-bar { position: relative; flex: 1; min-width: 200px; }
+        .search-bar input { padding-left: 2.5rem; }
+        .search-icon { position: absolute; left: 0.85rem; top: 50%; transform: translateY(-50%); color: hsl(var(--text-secondary)); font-size: 0.9rem; pointer-events: none; }
+    </style>
+</head>
+<body>
+<div class="app-layout">
+    <aside class="sidebar">
+        <div class="sidebar-logo"><div class="sidebar-logo-mark">A+</div>AlugaMais</div>
+        <span class="sidebar-section-label">Menu</span>
+        <nav>
+            <a href="/dashboard.html" class="nav-link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Painel</a>
+            <a href="/properties.html" class="nav-link active"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Imóveis</a>
+            <a href="/tenants.html" class="nav-link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>Inquilinos</a>
+            <a href="/charges.html" class="nav-link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Cobranças</a>
+            <a href="/payments.html" class="nav-link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Pagamentos</a>
+            <a href="/reports.html" class="nav-link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Relatórios</a>
+        </nav>
+        <div class="sidebar-footer"><button class="logout-btn" onclick="logout()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Sair</button></div>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Imóveis</h1>
+                <p class="page-subtitle">Visualize e gerencie seu portfólio de propriedades</p>
+            </div>
+            <a href="/new-rental.html" class="btn btn-primary">+ Cadastrar Imóvel</a>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));margin-bottom:1.5rem">
+            <div class="stat-card glass-panel"><div class="stat-label">Total de Imóveis</div><div class="stat-value" id="ps-total">—</div></div>
+            <div class="stat-card glass-panel"><div class="stat-label">Ocupados</div><div class="stat-value text-success" id="ps-occupied">—</div></div>
+            <div class="stat-card glass-panel"><div class="stat-label">Vagos</div><div class="stat-value text-muted" id="ps-vacant">—</div></div>
+            <div class="stat-card glass-panel"><div class="stat-label">Receita Ativa</div><div class="stat-value" id="ps-revenue">—</div></div>
+        </div>
+
+        <!-- Search & Filters -->
+        <div style="display:flex;gap:0.75rem;margin-bottom:1.5rem;flex-wrap:wrap">
+            <div class="search-bar">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" class="form-control" placeholder="Buscar por endereço...">
+            </div>
+            <div style="display:flex;gap:0.5rem">
+                <button class="filter-btn active" onclick="setFilter('all',this)">Todos</button>
+                <button class="filter-btn" onclick="setFilter('occupied',this)">Ocupados</button>
+                <button class="filter-btn" onclick="setFilter('vacant',this)">Vagos</button>
+            </div>
+        </div>
+
+        <div class="properties-grid" id="properties-grid">
+            <div style="text-align:center;padding:3rem;color:hsl(var(--text-secondary));grid-column:1/-1">Carregando...</div>
+        </div>
+    </main>
+</div>
+
+<script type="module">
+    const token = localStorage.getItem('alugamais_token');
+    if (!token) window.location.href = '/login.html';
+    window.logout = () => { localStorage.removeItem('alugamais_token'); window.location.href = '/login.html'; };
+
+    const BRL = new Intl.NumberFormat('pt-BR', { style:'currency', currency:'BRL' });
+    let allData = [];
+    let currentFilter = 'all';
+    let searchQuery = '';
+
+    const typeIcon = { apartment:'🏢', house:'🏡', commercial:'🏪', land:'🌿' };
+    const typeName = { apartment:'Apartamento', house:'Casa', commercial:'Comercial', land:'Terreno' };
+
+    function initials(name) {
+        return (name || '?').split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
+    }
+
+    function render() {
+        let list = allData;
+        if (currentFilter === 'occupied') list = list.filter(r => r.status === 'active');
+        if (currentFilter === 'vacant') list = list.filter(r => r.status !== 'active');
+        if (searchQuery) {
+            const q = searchQuery.toLowerCase();
+            list = list.filter(r => (r.property?.address||'').toLowerCase().includes(q) || (r.property?.buildingName||'').toLowerCase().includes(q));
+        }
+
+        const occupied = allData.filter(r => r.status === 'active');
+        const vacant = allData.filter(r => r.status !== 'active');
+        document.getElementById('ps-total').textContent = allData.length;
+        document.getElementById('ps-occupied').textContent = occupied.length;
+        document.getElementById('ps-vacant').textContent = vacant.length;
+        document.getElementById('ps-revenue').textContent = BRL.format(occupied.reduce((s,r) => s + r.baseRentAmount, 0));
+
+        const grid = document.getElementById('properties-grid');
+        if (list.length === 0) {
+            grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-state-icon">🏠</div><h3>Nenhum imóvel encontrado</h3><p>Cadastre seu primeiro imóvel para começar.</p><a href="/new-rental.html" class="btn btn-primary">+ Cadastrar Imóvel</a></div>`;
+            return;
+        }
+
+        grid.innerHTML = list.map(r => {
+            const p = r.property || {};
+            const isActive = r.status === 'active';
+            return `
+            <a href="/rental-detail.html?id=${r.id}" style="text-decoration:none">
+            <div class="property-card">
+                <div class="property-card-header">
+                    <div style="display:flex;align-items:center;gap:0.75rem">
+                        <div class="property-type-icon">${typeIcon[p.propertyType] || '🏠'}</div>
+                        <div>
+                            <div class="property-address">${p.address || '—'}</div>
+                            ${p.buildingName ? `<div class="property-building">${p.buildingName}</div>` : ''}
+                        </div>
+                    </div>
+                    <span class="badge ${isActive ? 'badge-success' : 'badge-secondary'}">${isActive ? 'Ocupado' : 'Vago'}</span>
+                </div>
+                <div class="property-card-body">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem">
+                        <span class="badge badge-info" style="font-size:0.72rem">${typeName[p.propertyType] || '—'}</span>
+                        <span style="font-weight:700;font-size:1rem">${BRL.format(r.baseRentAmount)}<span style="font-weight:400;font-size:0.75rem;color:hsl(var(--text-secondary))">/mês</span></span>
+                    </div>
+                    <div class="property-meta">
+                        ${p.area ? `<div class="property-meta-item">📐 ${p.area}m²</div>` : ''}
+                        ${p.bedrooms ? `<div class="property-meta-item">🛏 ${p.bedrooms} quarto${p.bedrooms > 1 ? 's' : ''}</div>` : ''}
+                        ${p.bathrooms ? `<div class="property-meta-item">🚿 ${p.bathrooms} banheiro${p.bathrooms > 1 ? 's' : ''}</div>` : ''}
+                    </div>
+                </div>
+                <div class="property-card-footer">
+                    ${isActive ? `
+                    <div class="tenant-chip">
+                        <div class="tenant-mini-avatar">${initials(r.tenantName)}</div>
+                        <div>
+                            <div style="font-size:0.82rem;font-weight:600">${r.tenantName}</div>
+                            <div style="font-size:0.72rem;color:hsl(var(--text-secondary))">Vence dia ${r.dueDateDay}</div>
+                        </div>
+                    </div>
+                    ` : `<span class="text-sm text-muted">Sem inquilino</span>`}
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:0.3"><polyline points="9 18 15 12 9 6"/></svg>
+                </div>
+            </div>
+            </a>
+        `;
+        }).join('');
+    }
+
+    window.setFilter = function(f, btn) {
+        currentFilter = f;
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        render();
+    };
+
+    document.getElementById('searchInput').addEventListener('input', e => {
+        searchQuery = e.target.value;
+        render();
+    });
+
+    async function load() {
+        try {
+            const res = await fetch('/api/rentals', { headers: { 'Authorization':`Bearer ${token}` } });
+            if (res.status === 401) return window.logout();
+            allData = await res.json();
+            render();
+        } catch(e) {
+            document.getElementById('properties-grid').innerHTML = '<div style="grid-column:1/-1" class="empty-state"><p>⚠️ Erro ao carregar imóveis.</p></div>';
+        }
+    }
+    load();
+</script>
+</body>
+</html>

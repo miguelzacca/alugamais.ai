@@ -3,268 +3,379 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel - AlugaMais</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Painel — AlugaMais</title>
+    <meta name="description" content="Painel central de controle do seu portfólio de aluguéis.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/global.css">
     <style>
-        .app-layout {
+        .rental-row {
             display: grid;
-            grid-template-columns: 250px 1fr;
-            min-height: 100vh;
-        }
-
-        .sidebar {
-            background-color: hsl(var(--surface-color));
-            border-right: 1px solid var(--glass-border);
-            padding: 1.5rem;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .sidebar-logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: hsl(var(--primary-color));
-            margin-bottom: 3rem;
-            letter-spacing: -0.5px;
-        }
-
-        .nav-link {
-            display: flex;
+            grid-template-columns: 1fr auto auto auto;
+            gap: 1rem;
             align-items: center;
-            padding: 0.8rem 1rem;
-            color: hsl(var(--text-secondary));
-            border-radius: var(--radius-md);
-            margin-bottom: 0.5rem;
-            transition: all var(--transition-speed);
-        }
-
-        .nav-link:hover, .nav-link.active {
-            background-color: hsla(var(--primary-color), 0.1);
-            color: hsl(var(--primary-color));
-        }
-
-        .logout-btn {
-            margin-top: auto;
-            color: hsl(var(--danger));
-            background: none;
-            border: none;
-            padding: 0.8rem 1rem;
-            text-align: left;
-            width: 100%;
-            border-radius: var(--radius-md);
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--glass-border);
             transition: background-color var(--transition-speed);
         }
+        .rental-row:last-child { border-bottom: none; }
+        .rental-row:hover { background-color: var(--glass-bg); }
+        .rental-row-info h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.2rem; }
+        .rental-row-info p { font-size: 0.82rem; color: hsl(var(--text-secondary)); }
+        .rental-row-amount { font-weight: 700; font-size: 1rem; color: hsl(var(--text-primary)); }
 
-        .logout-btn:hover {
-            background-color: hsla(var(--danger), 0.1);
-        }
-
-        .main-content {
-            padding: 2rem 3rem;
-            background-color: hsl(var(--bg-color));
-            overflow-y: auto;
-        }
-
-        .header-actions {
+        .due-card {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 2rem;
-        }
-
-        .user-greeting {
-            font-size: 1.5rem;
-            font-weight: 600;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 3rem;
-        }
-
-        .stat-card {
-            padding: 1.5rem;
-        }
-
-        .stat-title {
-            color: hsl(var(--text-secondary));
-            font-size: 0.9rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .stat-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: hsl(var(--text-primary));
-        }
-
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 3rem;
-            border: 1px dashed var(--glass-border);
-            border-radius: var(--radius-md);
-            color: hsl(var(--text-secondary));
-        }
-
-        .rental-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem;
+            padding: 0.9rem 1.2rem;
             border-bottom: 1px solid var(--glass-border);
         }
-        .rental-item:last-child {
-            border-bottom: none;
-        }
-
-        .rental-info h4 {
-            margin-bottom: 0.2rem;
-        }
-        .rental-info p {
-            font-size: 0.85rem;
-            color: hsl(var(--text-secondary));
-        }
-
-        .rental-amount {
+        .due-card:last-child { border-bottom: none; }
+        .due-days {
+            font-size: 0.75rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 999px;
             font-weight: 600;
-            color: hsl(var(--success));
+        }
+        .due-today { background: hsla(var(--warning-dim)); color: hsl(var(--warning)); }
+        .due-soon { background: hsla(var(--info-dim)); color: hsl(var(--info)); }
+
+        .payment-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 1.2rem;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .payment-item:last-child { border-bottom: none; }
+
+        .method-icon {
+            width: 32px; height: 32px;
+            border-radius: var(--radius-sm);
+            background: hsla(var(--primary-color) / 0.12);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.85rem; flex-shrink: 0;
         }
 
-        .loader {
-            text-align: center;
-            padding: 2rem;
-            color: hsl(var(--text-secondary));
+        .chart-bar-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            padding: 0.5rem 0;
         }
+        .chart-bar-row {
+            display: grid;
+            grid-template-columns: 100px 1fr 80px;
+            gap: 1rem;
+            align-items: center;
+            font-size: 0.82rem;
+        }
+        .chart-bar-label { color: hsl(var(--text-secondary)); text-align: right; }
+        .chart-bar-track {
+            height: 8px;
+            background: var(--glass-border);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+        .chart-bar-fill {
+            height: 100%;
+            border-radius: 999px;
+            background: linear-gradient(90deg, hsl(var(--primary-color)), hsl(var(--accent)));
+            transition: width 0.8s var(--transition-ease);
+        }
+        .chart-bar-value { color: hsl(var(--text-primary)); font-weight: 600; }
+
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; }
+
+        @media (max-width: 1100px) { .two-col { grid-template-columns: 1fr; } }
+        @media (max-width: 800px) { .three-col { grid-template-columns: 1fr 1fr; } }
+
+        .welcome-bar {
+            background: linear-gradient(135deg, hsla(var(--primary-color) / 0.15), hsla(var(--accent) / 0.08));
+            border: 1px solid hsla(var(--primary-color) / 0.2);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem 2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .welcome-bar h1 { font-size: 1.4rem; font-weight: 700; }
+        .welcome-bar p { color: hsl(var(--text-secondary)); font-size: 0.9rem; margin-top: 0.2rem; }
+
+        .action-btn-row { display: flex; gap: 0.75rem; flex-wrap: wrap; }
     </style>
 </head>
 <body>
-    <div class="app-layout">
-        <aside class="sidebar">
-            <div class="sidebar-logo">AlugaMais</div>
-            <nav>
-                <a href="#" class="nav-link active">Painel</a>
-                <a href="#" class="nav-link">Imóveis</a>
-                <a href="#" class="nav-link">Inquilinos</a>
-            </nav>
-            <button class="logout-btn" onclick="logout()">Sair</button>
-        </aside>
+<div class="app-layout">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <div class="sidebar-logo-mark">A+</div>
+            AlugaMais
+        </div>
+        <span class="sidebar-section-label">Menu</span>
+        <nav>
+            <a href="/dashboard.html" class="nav-link active" id="nav-dashboard">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                Painel
+            </a>
+            <a href="/properties.html" class="nav-link" id="nav-properties">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                Imóveis
+            </a>
+            <a href="/tenants.html" class="nav-link" id="nav-tenants">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+                Inquilinos
+            </a>
+            <a href="/charges.html" class="nav-link" id="nav-charges">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                Cobranças
+            </a>
+            <a href="/payments.html" class="nav-link" id="nav-payments">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+                Pagamentos
+            </a>
+            <a href="/reports.html" class="nav-link" id="nav-reports">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                Relatórios
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <button class="logout-btn" onclick="logout()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                Sair
+            </button>
+        </div>
+    </aside>
 
-        <main class="main-content">
-            <div class="header-actions">
-                <h1 class="user-greeting">Olá, <span id="userName">...</span></h1>
-                <a href="/new-rental.html" class="btn btn-primary">+ Novo Aluguel</a>
+    <!-- MAIN -->
+    <main class="main-content">
+        <div id="loader" style="text-align:center;padding:4rem;color:hsl(var(--text-secondary))">
+            <div style="font-size:1.5rem;margin-bottom:0.5rem">⟳</div>Carregando painel...
+        </div>
+
+        <div id="dashboard-content" style="display:none">
+            <!-- Welcome Bar -->
+            <div class="welcome-bar">
+                <div>
+                    <h1>Olá, <span id="userName">...</span> 👋</h1>
+                    <p id="currentDate"></p>
+                </div>
+                <div class="action-btn-row">
+                    <button class="btn btn-glass btn-sm" onclick="generateCharges()">⚡ Gerar Cobranças</button>
+                    <a href="/new-rental.html" class="btn btn-primary">+ Novo Aluguel</a>
+                </div>
             </div>
 
-            <div id="dashboard-content" style="display: none;">
-                <div class="stats-grid">
-                    <div class="stat-card glass-panel">
-                        <div class="stat-title">Receita Prevista (Mês)</div>
-                        <div class="stat-value" id="stat-revenue">R$ 0,00</div>
-                    </div>
-                    <div class="stat-card glass-panel">
-                        <div class="stat-title">Aluguéis Ativos</div>
-                        <div class="stat-value" id="stat-active">0</div>
-                    </div>
-                    <div class="stat-card glass-panel">
-                        <div class="stat-title">Inadimplentes</div>
-                        <div class="stat-value" style="color: hsl(var(--danger))" id="stat-late">0</div>
-                    </div>
+            <!-- Stats Grid -->
+            <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
+                <div class="stat-card glass-panel">
+                    <div class="stat-card-icon" style="background:hsla(var(--primary-color)/0.12);color:hsl(var(--primary-color))">💰</div>
+                    <div class="stat-label">Receita do Mês</div>
+                    <div class="stat-value" id="stat-revenue">—</div>
+                    <div class="stat-change" id="stat-revenue-sub"></div>
                 </div>
-
-                <div class="section-header">
-                    <h2>Meus Aluguéis</h2>
+                <div class="stat-card glass-panel">
+                    <div class="stat-card-icon" style="background:hsla(var(--success)/0.12);color:hsl(var(--success))">🏠</div>
+                    <div class="stat-label">Aluguéis Ativos</div>
+                    <div class="stat-value" id="stat-active">—</div>
+                    <div class="stat-change" id="stat-occupancy"></div>
                 </div>
-                
-                <div class="glass-panel" id="rentals-list">
-                    <!-- Populated via JS -->
+                <div class="stat-card glass-panel">
+                    <div class="stat-card-icon" style="background:hsla(var(--success)/0.12);color:hsl(var(--success))">✅</div>
+                    <div class="stat-label">Recebido (Mês)</div>
+                    <div class="stat-value text-success" id="stat-paid">—</div>
+                </div>
+                <div class="stat-card glass-panel">
+                    <div class="stat-card-icon" style="background:hsla(var(--danger)/0.12);color:hsl(var(--danger))">⚠️</div>
+                    <div class="stat-label">Pendente (Mês)</div>
+                    <div class="stat-value text-warning" id="stat-pending">—</div>
+                </div>
+                <div class="stat-card glass-panel">
+                    <div class="stat-card-icon" style="background:hsla(var(--danger)/0.12);color:hsl(var(--danger))">🔴</div>
+                    <div class="stat-label">Inadimplentes</div>
+                    <div class="stat-value text-danger" id="stat-late">—</div>
+                </div>
+                <div class="stat-card glass-panel">
+                    <div class="stat-card-icon" style="background:hsla(var(--accent)/0.12);color:hsl(var(--accent))">📈</div>
+                    <div class="stat-label">Receita Anual</div>
+                    <div class="stat-value" id="stat-ytd">—</div>
                 </div>
             </div>
-            
-            <div id="loader" class="loader">Carregando painel...</div>
-        </main>
-    </div>
 
-    <script type="module">
-        const token = localStorage.getItem('alugamais_token');
-        if (!token) window.location.href = '/login.html';
+            <!-- Main Content Grid -->
+            <div class="two-col" style="margin-bottom:1.5rem">
+                <!-- Rentals List -->
+                <div>
+                    <div class="section-header">
+                        <span class="section-title">Aluguéis Ativos</span>
+                        <a href="/tenants.html" class="btn btn-glass btn-sm">Ver todos</a>
+                    </div>
+                    <div class="glass-panel" id="rentals-list" style="overflow:hidden"></div>
+                </div>
 
-        function parseJwt(token) {
-            try {
-                const base64Url = token.split('.')[1];
-                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-                return JSON.parse(decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
-            } catch(e) { return null; }
-        }
-
-        const user = parseJwt(token);
-        if (user) document.getElementById('userName').textContent = user.name.split(' ')[0];
-
-        window.logout = function() {
-            localStorage.removeItem('alugamais_token');
-            window.location.href = '/login.html';
-        }
-
-        // Fetch Dashboard Data
-        async function loadDashboard() {
-            try {
-                const res = await fetch('/api/dashboard', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-
-                if (res.status === 401) return logout();
-                const data = await res.json();
-
-                // Format Currency
-                const BRL = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
-
-                document.getElementById('stat-revenue').textContent = BRL.format(data.stats.expectedRevenue);
-                document.getElementById('stat-active').textContent = data.stats.activeRentals;
-                document.getElementById('stat-late').textContent = data.stats.latePayments;
-
-                const listContainer = document.getElementById('rentals-list');
-                
-                if (data.rentals.length === 0) {
-                    listContainer.innerHTML = `
-                        <div class="empty-state">
-                            Você ainda não cadastrou nenhum aluguel.<br><br>
-                            <a href="/new-rental.html" class="btn btn-primary">Começar a Cadastrar</a>
+                <!-- Right Column -->
+                <div class="flex-col gap-3">
+                    <!-- Upcoming Due -->
+                    <div>
+                        <div class="section-header">
+                            <span class="section-title">⏰ Vencendo em Breve</span>
                         </div>
-                    `;
-                } else {
-                    let html = '';
-                    data.rentals.forEach(r => {
-                        html += `
-                            <div class="rental-item">
-                                <div class="rental-info">
-                                    <h4>${r.address} ${r.buildingName ? `(${r.buildingName})` : ''}</h4>
-                                    <p>Inquilino: ${r.tenantName} • Vence dia ${r.dueDateDay}</p>
-                                </div>
-                                <div class="rental-amount">${BRL.format(r.baseRent)}</div>
-                            </div>
-                        `;
-                    });
-                    listContainer.innerHTML = html;
-                }
+                        <div class="glass-panel" id="upcoming-due" style="overflow:hidden"></div>
+                    </div>
 
-                document.getElementById('loader').style.display = 'none';
-                document.getElementById('dashboard-content').style.display = 'block';
-            } catch (err) {
-                console.error(err);
-                document.getElementById('loader').textContent = 'Erro ao carregar dados.';
+                    <!-- Recent Payments -->
+                    <div>
+                        <div class="section-header">
+                            <span class="section-title">💳 Últimos Pagamentos</span>
+                            <a href="/payments.html" class="btn btn-glass btn-sm">Ver todos</a>
+                        </div>
+                        <div class="glass-panel" id="recent-payments" style="overflow:hidden"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Toast -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script type="module">
+    const token = localStorage.getItem('alugamais_token');
+    if (!token) window.location.href = '/login.html';
+
+    function parseJwt(t) {
+        try {
+            return JSON.parse(decodeURIComponent(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')).split('').map(c=>'%'+('00'+c.charCodeAt(0).toString(16)).slice(-2)).join('')));
+        } catch(e) { return null; }
+    }
+
+    const user = parseJwt(token);
+    if (user) document.getElementById('userName').textContent = user.name.split(' ')[0];
+
+    const now = new Date();
+    document.getElementById('currentDate').textContent = now.toLocaleDateString('pt-BR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+
+    const BRL = new Intl.NumberFormat('pt-BR', { style:'currency', currency:'BRL' });
+
+    window.logout = () => { localStorage.removeItem('alugamais_token'); window.location.href = '/login.html'; };
+
+    function showToast(msg, type = 'success') {
+        const c = document.getElementById('toastContainer');
+        const t = document.createElement('div');
+        t.className = `toast toast-${type}`;
+        t.innerHTML = `<span class="toast-icon">${type === 'success' ? '✓' : '✕'}</span>${msg}`;
+        c.appendChild(t);
+        requestAnimationFrame(() => { t.classList.add('show'); });
+        setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 400); }, 3000);
+    }
+
+    window.generateCharges = async () => {
+        try {
+            const r = await fetch('/api/charges', { method:'POST', headers:{ 'Authorization':`Bearer ${token}`, 'Content-Type':'application/json' }, body:'{}' });
+            const d = await r.json();
+            showToast(`${d.generated} cobrança(s) gerada(s) com sucesso!`);
+            loadDashboard();
+        } catch(e) { showToast('Erro ao gerar cobranças', 'error'); }
+    };
+
+    function statusBadge(status) {
+        const map = { paid:'badge-success', pending:'badge-warning', late:'badge-danger', active:'badge-success', ended:'badge-secondary' };
+        const label = { paid:'Pago', pending:'Pendente', late:'Atrasado', active:'Ativo', ended:'Encerrado' };
+        return `<span class="badge ${map[status]||'badge-secondary'}">${label[status]||status}</span>`;
+    }
+
+    function methodIcon(m) {
+        return { pix:'💠', transfer:'🏦', cash:'💵', check:'📄', other:'💳' }[m] || '💳';
+    }
+
+    async function loadDashboard() {
+        try {
+            const res = await fetch('/api/dashboard', { headers:{ 'Authorization':`Bearer ${token}` } });
+            if (res.status === 401) return window.logout();
+            const data = await res.json();
+            const s = data.stats;
+
+            document.getElementById('stat-revenue').textContent = BRL.format(s.expectedRevenue);
+            document.getElementById('stat-revenue-sub').textContent = `${s.totalProperties} imóvel(is) cadastrado(s)`;
+            document.getElementById('stat-active').textContent = s.activeRentals;
+            document.getElementById('stat-occupancy').innerHTML = `<span class="${s.occupancyRate >= 80 ? 'up' : 'down'}">${s.occupancyRate}% de ocupação</span>`;
+            document.getElementById('stat-paid').textContent = BRL.format(s.paidThisMonth || 0);
+            document.getElementById('stat-pending').textContent = BRL.format(s.pendingThisMonth || 0);
+            document.getElementById('stat-late').textContent = s.latePayments;
+            document.getElementById('stat-ytd').textContent = BRL.format(s.ytdRevenue || 0);
+
+            // Rentals list
+            const rentalsList = document.getElementById('rentals-list');
+            if (!data.rentals || data.rentals.length === 0) {
+                rentalsList.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🏠</div><h3>Nenhum aluguel ativo</h3><p>Comece cadastrando seu primeiro imóvel</p><a href="/new-rental.html" class="btn btn-primary">+ Novo Aluguel</a></div>`;
+            } else {
+                rentalsList.innerHTML = data.rentals.map(r => `
+                    <a href="/rental-detail.html?id=${r.id}" style="text-decoration:none;color:inherit">
+                    <div class="rental-row">
+                        <div class="rental-row-info">
+                            <h4>${r.address}${r.buildingName ? ` <span style="font-weight:400;color:hsl(var(--text-secondary))">(${r.buildingName})</span>` : ''}</h4>
+                            <p>${r.tenantName} • Vence dia ${r.dueDateDay}</p>
+                        </div>
+                        <div>${statusBadge(r.chargeStatus)}</div>
+                        <div class="rental-row-amount">${BRL.format(r.totalAmount)}</div>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:0.3"><polyline points="9 18 15 12 9 6"/></svg>
+                    </div></a>
+                `).join('');
             }
-        }
 
-        loadDashboard();
-    </script>
+            // Upcoming due
+            const upcomingEl = document.getElementById('upcoming-due');
+            if (!data.upcomingDue || data.upcomingDue.length === 0) {
+                upcomingEl.innerHTML = `<div class="empty-state" style="padding:2rem"><p>Nenhum vencimento nos próximos 7 dias.</p></div>`;
+            } else {
+                upcomingEl.innerHTML = data.upcomingDue.map(d => `
+                    <div class="due-card">
+                        <div>
+                            <div style="font-weight:600;font-size:0.9rem">${d.tenantName}</div>
+                            <div class="text-sm text-muted">${d.address}</div>
+                        </div>
+                        <div style="text-align:right">
+                            <div class="due-days ${d.daysUntilDue === 0 ? 'due-today' : 'due-soon'}">
+                                ${d.daysUntilDue === 0 ? 'Hoje' : `${d.daysUntilDue}d`}
+                            </div>
+                            <div class="text-sm font-semibold mt-1">${BRL.format(d.amount)}</div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // Recent payments
+            const paymentsEl = document.getElementById('recent-payments');
+            if (!data.recentPayments || data.recentPayments.length === 0) {
+                paymentsEl.innerHTML = `<div class="empty-state" style="padding:2rem"><p>Nenhum pagamento registrado ainda.</p></div>`;
+            } else {
+                paymentsEl.innerHTML = data.recentPayments.map(p => `
+                    <div class="payment-item">
+                        <div style="display:flex;align-items:center;gap:0.75rem">
+                            <div class="method-icon">${methodIcon(p.method)}</div>
+                            <div>
+                                <div style="font-weight:600;font-size:0.88rem">${p.tenantName}</div>
+                                <div class="text-xs text-muted">${new Date(p.paidAt).toLocaleDateString('pt-BR')}</div>
+                            </div>
+                        </div>
+                        <div class="text-success font-semibold text-sm">${BRL.format(p.amount)}</div>
+                    </div>
+                `).join('');
+            }
+
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('dashboard-content').style.display = 'block';
+        } catch(err) {
+            console.error(err);
+            document.getElementById('loader').textContent = '⚠️ Erro ao carregar dados.';
+        }
+    }
+
+    loadDashboard();
+</script>
 </body>
 </html>

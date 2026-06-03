@@ -3,145 +3,207 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - AlugaMais</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Entrar — AlugaMais</title>
+    <meta name="description" content="Acesse o painel de gestão de aluguéis do AlugaMais.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/global.css">
     <style>
         body {
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+            background: radial-gradient(ellipse 80% 60% at 50% -10%, hsla(252,84%,67%,0.15) 0%, transparent 70%),
+                        hsl(var(--bg-color));
+        }
+
+        .auth-wrap {
+            display: grid;
+            grid-template-columns: 1fr 420px;
             min-height: 100vh;
-        }
-
-        .auth-container {
             width: 100%;
-            max-width: 400px;
-            padding: 2.5rem;
-            text-align: center;
         }
 
-        .auth-container h1 {
-            font-size: 1.8rem;
-            margin-bottom: 0.5rem;
+        .auth-brand {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 4rem 5rem;
+            background: linear-gradient(135deg,
+                hsla(252,84%,67%,0.08) 0%,
+                hsla(195,85%,55%,0.04) 100%
+            );
+            border-right: 1px solid var(--glass-border);
         }
 
-        .auth-container p {
-            color: hsl(var(--text-secondary));
-            margin-bottom: 2rem;
-            font-size: 0.95rem;
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 3rem;
+        }
+        .brand-logo-mark {
+            width: 40px; height: 40px;
+            background: linear-gradient(135deg, hsl(var(--primary-color)), hsl(var(--accent)));
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 1rem; color: white;
+            box-shadow: 0 6px 20px hsla(252,84%,67%,0.4);
+        }
+        .brand-logo-name {
+            font-size: 1.4rem; font-weight: 700; letter-spacing: -0.03em;
         }
 
-        .form-group {
-            margin-bottom: 1.5rem;
-            text-align: left;
+        .brand-headline {
+            font-size: clamp(1.8rem, 3vw, 2.5rem);
+            font-weight: 800;
+            letter-spacing: -0.04em;
+            line-height: 1.2;
+            margin-bottom: 1.25rem;
+            background: linear-gradient(135deg, hsl(var(--text-primary)), hsl(var(--text-secondary)));
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-size: 0.9rem;
-            color: hsl(var(--text-secondary));
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 0.8rem 1rem;
-            border-radius: var(--radius-md);
-            border: 1px solid var(--glass-border);
-            background-color: rgba(0,0,0,0.2);
-            color: hsl(var(--text-primary));
-            font-family: inherit;
+        .brand-sub {
             font-size: 1rem;
-            transition: border-color var(--transition-speed);
+            color: hsl(var(--text-secondary));
+            line-height: 1.6;
+            max-width: 440px;
+            margin-bottom: 2.5rem;
         }
 
-        .form-control:focus {
-            outline: none;
-            border-color: hsl(var(--primary-color));
+        .feature-list { display: flex; flex-direction: column; gap: 0.9rem; }
+        .feature-item {
+            display: flex; align-items: center; gap: 0.75rem;
+            font-size: 0.9rem; color: hsl(var(--text-secondary));
+        }
+        .feature-item-icon {
+            width: 28px; height: 28px; border-radius: 6px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.85rem; flex-shrink: 0;
+            background: hsla(var(--primary-color)/0.12);
         }
 
-        .btn-block {
-            width: 100%;
-            padding: 0.8rem;
-            font-size: 1rem;
-            margin-top: 1rem;
+        .auth-panel {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 3rem 2.5rem;
+            background: hsl(var(--surface-color));
         }
 
-        .auth-links {
-            margin-top: 1.5rem;
-            font-size: 0.9rem;
-        }
+        .auth-panel-header { margin-bottom: 2rem; }
+        .auth-panel-header h1 { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.03em; }
+        .auth-panel-header p { color: hsl(var(--text-secondary)); font-size: 0.9rem; margin-top: 0.4rem; }
 
-        #error-msg {
+        .error-box {
+            background: hsla(var(--danger-dim));
+            border: 1px solid hsla(var(--danger)/0.3);
             color: hsl(var(--danger));
-            font-size: 0.9rem;
-            margin-bottom: 1rem;
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-md);
+            font-size: 0.85rem;
+            margin-bottom: 1.25rem;
             display: none;
+        }
+
+        .btn-full { width: 100%; padding: 0.75rem; font-size: 0.95rem; margin-top: 0.5rem; }
+        .auth-footer { margin-top: 1.5rem; text-align: center; font-size: 0.88rem; color: hsl(var(--text-secondary)); }
+
+        .input-wrap { position: relative; }
+        .input-icon { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: hsl(var(--text-muted)); font-size: 0.9rem; pointer-events: none; }
+        .input-wrap .form-control { padding-left: 2.6rem; }
+
+        @media (max-width: 780px) {
+            .auth-wrap { grid-template-columns: 1fr; }
+            .auth-brand { display: none; }
         }
     </style>
 </head>
 <body>
-    <div class="auth-container glass-panel">
-        <h1>Bem-vindo de volta</h1>
-        <p>Acesse o seu painel do AlugaMais.</p>
+<div class="auth-wrap">
+    <!-- Brand side -->
+    <div class="auth-brand">
+        <div class="brand-logo">
+            <div class="brand-logo-mark">A+</div>
+            <span class="brand-logo-name">AlugaMais</span>
+        </div>
+        <h1 class="brand-headline">Gestão de aluguéis<br>sem complicação.</h1>
+        <p class="brand-sub">Controle seus imóveis, inquilinos, cobranças e pagamentos em um só lugar. Simples, rápido e profissional.</p>
+        <div class="feature-list">
+            <div class="feature-item"><div class="feature-item-icon">📊</div>Dashboard com métricas em tempo real</div>
+            <div class="feature-item"><div class="feature-item-icon">⚡</div>Geração automática de cobranças mensais</div>
+            <div class="feature-item"><div class="feature-item-icon">💳</div>Controle completo de pagamentos</div>
+            <div class="feature-item"><div class="feature-item-icon">📈</div>Relatórios financeiros detalhados</div>
+            <div class="feature-item"><div class="feature-item-icon">🏠</div>Portfólio de imóveis organizado</div>
+        </div>
+    </div>
 
-        <div id="error-msg"></div>
+    <!-- Auth panel -->
+    <div class="auth-panel">
+        <div class="auth-panel-header">
+            <h1>Bem-vindo de volta 👋</h1>
+            <p>Entre com sua conta para acessar o painel.</p>
+        </div>
+
+        <div class="error-box" id="error-msg"></div>
 
         <form id="loginForm">
             <div class="form-group">
                 <label for="email">E-mail</label>
-                <input type="email" id="email" class="form-control" required placeholder="seu@email.com">
+                <div class="input-wrap">
+                    <span class="input-icon">✉️</span>
+                    <input type="email" id="email" class="form-control" required placeholder="seu@email.com" autocomplete="email">
+                </div>
             </div>
             <div class="form-group">
                 <label for="password">Senha</label>
-                <input type="password" id="password" class="form-control" required placeholder="••••••••">
+                <div class="input-wrap">
+                    <span class="input-icon">🔒</span>
+                    <input type="password" id="password" class="form-control" required placeholder="••••••••" autocomplete="current-password">
+                </div>
             </div>
-            <button type="submit" class="btn btn-primary btn-block" id="submitBtn">Entrar</button>
+            <button type="submit" class="btn btn-primary btn-full" id="submitBtn">Entrar</button>
         </form>
 
-        <div class="auth-links">
-            Não tem uma conta? <a href="/register.html">Registre-se</a>
+        <div class="auth-footer">
+            Não tem uma conta? <a href="/register.html" style="font-weight:600">Criar conta grátis</a>
         </div>
     </div>
+</div>
 
-    <script type="module">
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const btn = document.getElementById('submitBtn');
-            const errorMsg = document.getElementById('error-msg');
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+<script type="module">
+    if (localStorage.getItem('alugamais_token')) window.location.href = '/dashboard.html';
 
-            btn.disabled = true;
-            btn.textContent = 'Entrando...';
-            errorMsg.style.display = 'none';
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('submitBtn');
+        const errorMsg = document.getElementById('error-msg');
+        btn.disabled = true;
+        btn.innerHTML = '<span style="opacity:0.7">Entrando...</span>';
+        errorMsg.style.display = 'none';
 
-            try {
-                const res = await fetch('/api/auth/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                });
-
-                const data = await res.json();
-
-                if (!res.ok) {
-                    throw new Error(data.error || 'Erro ao entrar. Verifique suas credenciais.');
-                }
-
-                localStorage.setItem('alugamais_token', data.token);
-                window.location.href = '/dashboard.html';
-
-            } catch (err) {
-                errorMsg.textContent = err.message;
-                errorMsg.style.display = 'block';
-            } finally {
-                btn.disabled = false;
-                btn.textContent = 'Entrar';
-            }
-        });
-    </script>
+        try {
+            const res = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: document.getElementById('email').value,
+                    password: document.getElementById('password').value
+                })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Credenciais inválidas.');
+            localStorage.setItem('alugamais_token', data.token);
+            window.location.href = '/dashboard.html';
+        } catch(err) {
+            errorMsg.textContent = err.message;
+            errorMsg.style.display = 'block';
+            btn.disabled = false;
+            btn.textContent = 'Entrar';
+        }
+    });
+</script>
 </body>
 </html>

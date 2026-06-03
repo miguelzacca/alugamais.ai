@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalhe do Aluguel — AlugaMais</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/global.css">
+    <style>
+        .detail-header {
+            display: flex; align-items: flex-start; justify-content: space-between;
+            margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;
+        }
+        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap: 1rem; }
+        .info-item label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: hsl(var(--text-secondary)); font-weight: 600; display: block; margin-bottom: 0.3rem; }
+        .info-item span { font-size: 0.95rem; font-weight: 500; }
+        .charge-row { display: grid; grid-template-columns: auto 1fr auto auto auto; gap: 1rem; align-items: center; padding: 0.9rem 1.2rem; border-bottom: 1px solid var(--glass-border); }
+        .charge-row:last-child { border-bottom: none; }
+        .charge-month { font-weight: 700; font-size: 0.9rem; }
+        .charge-breakdown { font-size: 0.8rem; color: hsl(var(--text-secondary)); }
+        .pay-btn { padding: 0.3rem 0.8rem; font-size: 0.78rem; }
+
+        .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.6); backdrop-filter:blur(4px); z-index:1000; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.2s; }
+        .modal-overlay.open { opacity:1; pointer-events:all; }
+        .modal { background:hsl(var(--surface-color)); border:1px solid var(--glass-border); border-radius:var(--radius-xl); padding:2rem; width:100%; max-width:480px; box-shadow:var(--shadow-lg); transform:translateY(20px); transition:transform 0.2s; }
+        .modal-overlay.open .modal { transform:translateY(0); }
+        .modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; }
+    </style>
+</head>
+<body>
+<div class="app-layout">
+    <aside class="sidebar">
+        <div class="sidebar-logo"><div class="sidebar-logo-mark">A+</div>AlugaMais</div>
+        <span class="sidebar-section-label">Menu</span>
+        <nav>
+            <a href="/dashboard.html" class="nav-link">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Painel
+            </a>
+            <a href="/properties.html" class="nav-link">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Imóveis
+            </a>
+            <a href="/tenants.html" class="nav-link active">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>Inquilinos
+            </a>
+            <a href="/charges.html" class="nav-link">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Cobranças
+            </a>
+            <a href="/payments.html" class="nav-link">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Pagamentos
+            </a>
+            <a href="/reports.html" class="nav-link">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Relatórios
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <button class="logout-btn" onclick="logout()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Sair
+            </button>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div id="loader" style="text-align:center;padding:4rem;color:hsl(var(--text-secondary))">Carregando...</div>
+        <div id="detail-content" style="display:none">
+            <div class="detail-header">
+                <div>
+                    <div style="margin-bottom:0.5rem"><a href="/tenants.html" style="color:hsl(var(--text-secondary));font-size:0.85rem">← Inquilinos</a></div>
+                    <h1 class="page-title" id="detail-title">—</h1>
+                    <p class="page-subtitle" id="detail-subtitle">—</p>
+                </div>
+                <div style="display:flex;gap:0.75rem;flex-wrap:wrap">
+                    <button class="btn btn-glass btn-sm" onclick="openPayModal()">💳 Registrar Pagamento</button>
+                    <button class="btn btn-danger btn-sm" onclick="endRental()">Encerrar Contrato</button>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('info')">📋 Contrato</button>
+                <button class="tab-btn" onclick="switchTab('charges')">📅 Cobranças</button>
+                <button class="tab-btn" onclick="switchTab('payments')">💳 Pagamentos</button>
+            </div>
+
+            <!-- Info Tab -->
+            <div id="tab-info">
+                <div class="glass-panel" style="padding:2rem;margin-bottom:1.5rem">
+                    <h3 style="font-size:0.85rem;text-transform:uppercase;letter-spacing:0.05em;color:hsl(var(--text-secondary));margin-bottom:1.2rem">Imóvel</h3>
+                    <div class="info-grid" id="property-info"></div>
+                </div>
+                <div class="glass-panel" style="padding:2rem;margin-bottom:1.5rem">
+                    <h3 style="font-size:0.85rem;text-transform:uppercase;letter-spacing:0.05em;color:hsl(var(--text-secondary));margin-bottom:1.2rem">Inquilino</h3>
+                    <div class="info-grid" id="tenant-info"></div>
+                </div>
+                <div class="glass-panel" style="padding:2rem;margin-bottom:1.5rem">
+                    <h3 style="font-size:0.85rem;text-transform:uppercase;letter-spacing:0.05em;color:hsl(var(--text-secondary));margin-bottom:1.2rem">Valores</h3>
+                    <div class="info-grid" id="finance-info"></div>
+                </div>
+                <div class="glass-panel" style="padding:2rem" id="fees-panel">
+                    <h3 style="font-size:0.85rem;text-transform:uppercase;letter-spacing:0.05em;color:hsl(var(--text-secondary));margin-bottom:1.2rem">Taxas Adicionais</h3>
+                    <div id="fees-list"></div>
+                </div>
+            </div>
+
+            <!-- Charges Tab -->
+            <div id="tab-charges" style="display:none">
+                <div class="section-header">
+                    <span class="section-title">Histórico de Cobranças</span>
+                    <button class="btn btn-glass btn-sm" onclick="generateCharge()">⚡ Gerar Mês Atual</button>
+                </div>
+                <div class="glass-panel" style="overflow:hidden" id="charges-list"></div>
+            </div>
+
+            <!-- Payments Tab -->
+            <div id="tab-payments" style="display:none">
+                <div class="section-header">
+                    <span class="section-title">Pagamentos Recebidos</span>
+                </div>
+                <div class="glass-panel" style="overflow:hidden" id="payments-list"></div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Pay Modal -->
+<div class="modal-overlay" id="payModal">
+    <div class="modal">
+        <div class="modal-header">
+            <span class="modal-title">Registrar Pagamento</span>
+            <button class="modal-close" onclick="closePayModal()">×</button>
+        </div>
+        <div class="form-group">
+            <label>Cobrança Referente (Opcional)</label>
+            <select id="payChargeId" class="form-control"></select>
+        </div>
+        <div class="grid-2">
+            <div class="form-group">
+                <label>Valor Pago (R$) *</label>
+                <input type="number" step="0.01" id="payAmount" class="form-control" placeholder="1500.00">
+            </div>
+            <div class="form-group">
+                <label>Data do Pagamento *</label>
+                <input type="date" id="payDate" class="form-control">
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Forma de Pagamento</label>
+            <select id="payMethod" class="form-control">
+                <option value="pix">💠 PIX</option>
+                <option value="transfer">🏦 Transferência</option>
+                <option value="cash">💵 Dinheiro</option>
+                <option value="check">📄 Cheque</option>
+                <option value="other">💳 Outro</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Observação</label>
+            <input type="text" id="payNotes" class="form-control" placeholder="Referência, comprovante, etc.">
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:0.75rem;margin-top:1rem">
+            <button class="btn btn-glass" onclick="closePayModal()">Cancelar</button>
+            <button class="btn btn-primary" onclick="submitPayment()">✓ Confirmar Pagamento</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script type="module">
+    const token = localStorage.getItem('alugamais_token');
+    if (!token) window.location.href = '/login.html';
+    window.logout = () => { localStorage.removeItem('alugamais_token'); window.location.href='/login.html'; };
+
+    const params = new URLSearchParams(location.search);
+    const rentalId = params.get('id');
+    if (!rentalId) window.location.href = '/tenants.html';
+
+    const BRL = new Intl.NumberFormat('pt-BR', { style:'currency', currency:'BRL' });
+    let rentalData = null;
+
+    function showToast(msg, type='success') {
+        const c = document.getElementById('toastContainer');
+        const t = document.createElement('div');
+        t.className = `toast toast-${type}`;
+        t.innerHTML = `<span class="toast-icon">${type==='success'?'✓':'✕'}</span>${msg}`;
+        c.appendChild(t);
+        requestAnimationFrame(() => t.classList.add('show'));
+        setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 400); }, 3500);
+    }
+
+    function statusBadge(s) {
+        const map = { paid:'badge-success', pending:'badge-warning', late:'badge-danger', active:'badge-success', ended:'badge-secondary' };
+        const label = { paid:'Pago', pending:'Pendente', late:'Atrasado', active:'Ativo', ended:'Encerrado' };
+        return `<span class="badge ${map[s]||'badge-secondary'}">${label[s]||s}</span>`;
+    }
+
+    function infoItem(label, value) {
+        if (!value && value !== 0) return '';
+        return `<div class="info-item"><label>${label}</label><span>${value}</span></div>`;
+    }
+
+    function formatDate(d) {
+        if (!d) return '—';
+        return new Date(d).toLocaleDateString('pt-BR');
+    }
+
+    function monthLabel(m, y) {
+        return new Date(y, m-1, 1).toLocaleDateString('pt-BR', { month:'long', year:'numeric' });
+    }
+
+    const typeLabels = { apartment:'Apartamento', house:'Casa', commercial:'Comercial', land:'Terreno' };
+    const indexLabels = { none:'Sem reajuste', igpm:'IGP-M', ipca:'IPCA', fixed:'Taxa Fixa' };
+    const guaranteeLabels = { none:'Nenhuma', deposit:'Depósito Caução', surety:'Fiador', insurance:'Seguro Fiança', capitalization:'Título Capitalização' };
+    const methodLabels = { pix:'PIX', transfer:'Transferência', cash:'Dinheiro', check:'Cheque', other:'Outro' };
+
+    window.switchTab = function(tab) {
+        document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', ['info','charges','payments'][i] === tab));
+        document.getElementById('tab-info').style.display = tab === 'info' ? 'block' : 'none';
+        document.getElementById('tab-charges').style.display = tab === 'charges' ? 'block' : 'none';
+        document.getElementById('tab-payments').style.display = tab === 'payments' ? 'block' : 'none';
+    };
+
+    window.openPayModal = function() {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('payDate').value = today;
+        if (rentalData) document.getElementById('payAmount').value = rentalData.rental.baseRentAmount;
+
+        // Populate unpaid charges
+        const charges = (rentalData?.charges || []).filter(c => c.status !== 'paid');
+        const sel = document.getElementById('payChargeId');
+        sel.innerHTML = '<option value="">— Sem vínculo —</option>' + charges.map(c =>
+            `<option value="${c.id}">${monthLabel(c.month, c.year)} (${BRL.format(c.totalAmount)})</option>`
+        ).join('');
+
+        document.getElementById('payModal').classList.add('open');
+    };
+
+    window.closePayModal = function() { document.getElementById('payModal').classList.remove('open'); };
+
+    window.submitPayment = async function() {
+        const amount = document.getElementById('payAmount').value;
+        const paidAt = document.getElementById('payDate').value;
+        if (!amount || !paidAt) { showToast('Preencha valor e data.', 'error'); return; }
+
+        try {
+            const r = await fetch('/api/payments', {
+                method:'POST',
+                headers:{ 'Content-Type':'application/json', 'Authorization':`Bearer ${token}` },
+                body: JSON.stringify({
+                    rentalId,
+                    chargeId: document.getElementById('payChargeId').value || null,
+                    amount, paidAt,
+                    paymentMethod: document.getElementById('payMethod').value,
+                    notes: document.getElementById('payNotes').value
+                })
+            });
+            if (!r.ok) throw new Error('Erro ao registrar');
+            closePayModal();
+            showToast('Pagamento registrado com sucesso!');
+            loadDetail();
+        } catch(e) { showToast('Erro ao registrar pagamento.', 'error'); }
+    };
+
+    window.generateCharge = async function() {
+        try {
+            const r = await fetch('/api/charges', {
+                method:'POST',
+                headers:{ 'Content-Type':'application/json', 'Authorization':`Bearer ${token}` },
+                body:'{}'
+            });
+            const d = await r.json();
+            showToast(d.generated > 0 ? `Cobrança gerada!` : 'Cobrança já existia para este mês.');
+            loadDetail();
+        } catch(e) { showToast('Erro ao gerar cobrança.', 'error'); }
+    };
+
+    window.endRental = async function() {
+        if (!confirm('Tem certeza que deseja encerrar este contrato? Esta ação não pode ser desfeita.')) return;
+        try {
+            const r = await fetch(`/api/rentals/${rentalId}`, {
+                method:'DELETE',
+                headers:{ 'Authorization':`Bearer ${token}` }
+            });
+            if (!r.ok) throw new Error();
+            showToast('Contrato encerrado.');
+            setTimeout(() => window.location.href = '/tenants.html', 1500);
+        } catch(e) { showToast('Erro ao encerrar contrato.', 'error'); }
+    };
+
+    async function loadDetail() {
+        try {
+            const res = await fetch(`/api/rentals/${rentalId}`, { headers:{ 'Authorization':`Bearer ${token}` } });
+            if (res.status === 401) return window.logout();
+            rentalData = await res.json();
+            const { rental, fees, charges, payments } = rentalData;
+            const p = rental.property;
+
+            document.getElementById('detail-title').textContent = rental.tenantName;
+            document.getElementById('detail-subtitle').textContent = p.address + (p.buildingName ? ` · ${p.buildingName}` : '') + ' · ' + (rental.status === 'active' ? '🟢 Ativo' : '🔴 Encerrado');
+
+            document.getElementById('property-info').innerHTML = [
+                infoItem('Endereço', p.address),
+                infoItem('Edifício', p.buildingName),
+                infoItem('Tipo', typeLabels[p.propertyType] || p.propertyType),
+                infoItem('Área', p.area ? `${p.area} m²` : null),
+                infoItem('Quartos', p.bedrooms),
+                infoItem('Banheiros', p.bathrooms),
+            ].join('');
+
+            document.getElementById('tenant-info').innerHTML = [
+                infoItem('Nome', rental.tenantName),
+                infoItem('CPF/CNPJ', rental.tenantDocument),
+                infoItem('E-mail', rental.tenantEmail),
+                infoItem('Telefone', rental.tenantPhone),
+            ].join('');
+
+            document.getElementById('finance-info').innerHTML = [
+                infoItem('Aluguel Base', BRL.format(rental.baseRentAmount)),
+                infoItem('Vencimento', `Dia ${rental.dueDateDay}`),
+                infoItem('Entrada', formatDate(rental.moveInDate)),
+                infoItem('Término', rental.contractEndDate ? formatDate(rental.contractEndDate) : 'Indeterminado'),
+                infoItem('Reajuste', indexLabels[rental.indexType] || 'Sem reajuste'),
+                infoItem('Garantia', guaranteeLabels[rental.guaranteeType] || 'Nenhuma'),
+            ].join('');
+
+            if (fees.length > 0) {
+                document.getElementById('fees-list').innerHTML = `
+                    <div class="table-container"><table class="table">
+                    <thead><tr><th>Taxa</th><th>Valor</th><th>Tipo</th></tr></thead>
+                    <tbody>${fees.map(f => `<tr><td>${f.feeType}</td><td>${BRL.format(f.amount)}</td><td>${f.isVariable ? 'Variável' : 'Fixo'}</td></tr>`).join('')}</tbody>
+                    </table></div>`;
+            } else {
+                document.getElementById('fees-list').innerHTML = '<p class="text-sm text-muted">Nenhuma taxa adicional.</p>';
+            }
+
+            // Charges
+            if (charges.length === 0) {
+                document.getElementById('charges-list').innerHTML = '<div class="empty-state"><div class="empty-state-icon">📅</div><h3>Sem cobranças</h3><p>Clique em "Gerar Mês Atual" para criar a primeira cobrança.</p></div>';
+            } else {
+                document.getElementById('charges-list').innerHTML = charges.map(c => `
+                    <div class="charge-row">
+                        <div class="charge-month">${monthLabel(c.month, c.year)}</div>
+                        <div class="charge-breakdown">Aluguel: ${BRL.format(c.baseRent)}${c.totalFees > 0 ? ` + Taxas: ${BRL.format(c.totalFees)}` : ''}</div>
+                        <div style="font-weight:700">${BRL.format(c.totalAmount)}</div>
+                        <div>${statusBadge(c.status)}</div>
+                        <div>${c.status !== 'paid' ? `<button class="btn btn-success pay-btn" onclick="markPaid('${c.id}', ${c.totalAmount})">✓ Pago</button>` : ''}</div>
+                    </div>
+                `).join('');
+            }
+
+            // Payments
+            if (payments.length === 0) {
+                document.getElementById('payments-list').innerHTML = '<div class="empty-state"><div class="empty-state-icon">💳</div><h3>Sem pagamentos</h3><p>Registre um pagamento clicando em "Registrar Pagamento".</p></div>';
+            } else {
+                document.getElementById('payments-list').innerHTML = `<div class="table-container"><table class="table">
+                    <thead><tr><th>Data</th><th>Valor</th><th>Método</th><th>Obs.</th></tr></thead>
+                    <tbody>${payments.map(p => `<tr>
+                        <td>${new Date(p.paidAt).toLocaleDateString('pt-BR')}</td>
+                        <td class="text-success font-semibold">${BRL.format(p.amount)}</td>
+                        <td>${methodLabels[p.paymentMethod] || p.paymentMethod}</td>
+                        <td class="text-muted text-sm">${p.notes || '—'}</td>
+                    </tr>`).join('')}</tbody></table></div>`;
+            }
+
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('detail-content').style.display = 'block';
+        } catch(e) {
+            console.error(e);
+            document.getElementById('loader').textContent = '⚠️ Erro ao carregar detalhes.';
+        }
+    }
+
+    window.markPaid = function(chargeId, amount) {
+        document.getElementById('payChargeId').value = chargeId;
+        document.getElementById('payAmount').value = amount;
+        document.getElementById('payDate').value = new Date().toISOString().split('T')[0];
+        openPayModal();
+    };
+
+    loadDetail();
+</script>
+</body>
+</html>

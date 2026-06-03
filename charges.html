@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cobranças — AlugaMais</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/global.css">
+    <style>
+        .filters-bar {
+            display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.5rem; align-items: center;
+        }
+        .filter-btn {
+            padding: 0.35rem 1rem; border-radius: 999px;
+            background: var(--glass-bg); border: 1px solid var(--glass-border);
+            color: hsl(var(--text-secondary)); font-size: 0.8rem; font-weight: 500;
+            cursor: pointer; transition: all var(--transition-speed);
+        }
+        .filter-btn.active {
+            background: hsla(var(--primary-color)/0.15);
+            border-color: hsla(var(--primary-color)/0.4);
+            color: hsl(var(--primary-color));
+        }
+        .charge-item {
+            display: grid;
+            grid-template-columns: 1fr 120px 120px 110px 100px;
+            gap: 1rem; align-items: center;
+            padding: 1rem 1.5rem; border-bottom: 1px solid var(--glass-border);
+            transition: background var(--transition-speed);
+        }
+        .charge-item:hover { background: var(--glass-bg); }
+        .charge-item:last-child { border-bottom: none; }
+        .charge-header-row {
+            display: grid;
+            grid-template-columns: 1fr 120px 120px 110px 100px;
+            gap: 1rem; padding: 0.6rem 1.5rem;
+            font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em;
+            text-transform: uppercase; color: hsl(var(--text-secondary));
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .charge-tenant h4 { font-size: 0.9rem; font-weight: 600; margin-bottom: 0.15rem; }
+        .charge-tenant p { font-size: 0.78rem; color: hsl(var(--text-secondary)); }
+        .month-label { font-size: 0.85rem; font-weight: 600; }
+        .pay-btn-sm { font-size: 0.78rem; padding: 0.3rem 0.7rem; }
+
+        .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.6); backdrop-filter:blur(4px); z-index:1000; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.2s; }
+        .modal-overlay.open { opacity:1; pointer-events:all; }
+        .modal { background:hsl(var(--surface-color)); border:1px solid var(--glass-border); border-radius:var(--radius-xl); padding:2rem; width:100%; max-width:480px; box-shadow:var(--shadow-lg); transform:translateY(20px); transition:transform 0.2s; }
+        .modal-overlay.open .modal { transform:translateY(0); }
+        .modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; }
+        .modal-title { font-size:1.05rem; font-weight:700; }
+        .modal-close { background:none; border:none; color:hsl(var(--text-secondary)); font-size:1.3rem; padding:0.25rem; border-radius:var(--radius-sm); cursor:pointer; }
+        .modal-close:hover { background:var(--glass-bg); }
+    </style>
+</head>
+<body>
+<div class="app-layout">
+    <aside class="sidebar">
+        <div class="sidebar-logo"><div class="sidebar-logo-mark">A+</div>AlugaMais</div>
+        <span class="sidebar-section-label">Menu</span>
+        <nav>
+            <a href="/dashboard.html" class="nav-link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Painel</a>
+            <a href="/properties.html" class="nav-link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Imóveis</a>
+            <a href="/tenants.html" class="nav-link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>Inquilinos</a>
+            <a href="/charges.html" class="nav-link active"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Cobranças</a>
+            <a href="/payments.html" class="nav-link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Pagamentos</a>
+            <a href="/reports.html" class="nav-link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Relatórios</a>
+        </nav>
+        <div class="sidebar-footer"><button class="logout-btn" onclick="logout()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Sair</button></div>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Cobranças</h1>
+                <p class="page-subtitle">Gerencie as cobranças mensais dos seus aluguéis</p>
+            </div>
+            <button class="btn btn-primary" onclick="generateAll()">⚡ Gerar Cobranças do Mês</button>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));margin-bottom:1.5rem" id="charge-stats">
+            <div class="stat-card glass-panel"><div class="stat-label">Total</div><div class="stat-value" id="cs-total">—</div></div>
+            <div class="stat-card glass-panel"><div class="stat-label">Pagas</div><div class="stat-value text-success" id="cs-paid">—</div></div>
+            <div class="stat-card glass-panel"><div class="stat-label">Pendentes</div><div class="stat-value text-warning" id="cs-pending">—</div></div>
+            <div class="stat-card glass-panel"><div class="stat-label">Atrasadas</div><div class="stat-value text-danger" id="cs-late">—</div></div>
+            <div class="stat-card glass-panel"><div class="stat-label">Valor Total</div><div class="stat-value" id="cs-amount">—</div></div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-bar">
+            <span style="font-size:0.85rem;color:hsl(var(--text-secondary));font-weight:500">Status:</span>
+            <button class="filter-btn active" onclick="setFilter('status','all',this)">Todos</button>
+            <button class="filter-btn" onclick="setFilter('status','pending',this)">Pendentes</button>
+            <button class="filter-btn" onclick="setFilter('status','paid',this)">Pagos</button>
+            <button class="filter-btn" onclick="setFilter('status','late',this)">Atrasados</button>
+            <div style="width:1px;height:24px;background:var(--glass-border)"></div>
+            <span style="font-size:0.85rem;color:hsl(var(--text-secondary));font-weight:500">Mês:</span>
+            <select id="monthFilter" class="form-control" style="width:auto;padding:0.35rem 0.75rem;font-size:0.82rem" onchange="applyFilters()">
+                <option value="">Todos os meses</option>
+            </select>
+        </div>
+
+        <!-- Table -->
+        <div class="glass-panel" style="overflow:hidden">
+            <div class="charge-header-row">
+                <div>Inquilino / Imóvel</div>
+                <div>Mês</div>
+                <div style="text-align:right">Valor</div>
+                <div>Status</div>
+                <div>Ação</div>
+            </div>
+            <div id="charges-list">
+                <div style="text-align:center;padding:3rem;color:hsl(var(--text-secondary))">Carregando...</div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Pay Modal -->
+<div class="modal-overlay" id="payModal">
+    <div class="modal">
+        <div class="modal-header">
+            <span class="modal-title">Confirmar Pagamento</span>
+            <button class="modal-close" onclick="closeModal()">×</button>
+        </div>
+        <p class="text-sm text-muted mb-3" id="modal-charge-info"></p>
+        <div class="grid-2">
+            <div class="form-group">
+                <label>Valor Pago (R$) *</label>
+                <input type="number" step="0.01" id="payAmount" class="form-control">
+            </div>
+            <div class="form-group">
+                <label>Data do Pagamento *</label>
+                <input type="date" id="payDate" class="form-control">
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Forma de Pagamento</label>
+            <select id="payMethod" class="form-control">
+                <option value="pix">💠 PIX</option>
+                <option value="transfer">🏦 Transferência</option>
+                <option value="cash">💵 Dinheiro</option>
+                <option value="check">📄 Cheque</option>
+                <option value="other">💳 Outro</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Observação</label>
+            <input type="text" id="payNotes" class="form-control" placeholder="Opcional...">
+        </div>
+        <div style="display:flex;gap:0.75rem;justify-content:flex-end;margin-top:1rem">
+            <button class="btn btn-glass" onclick="closeModal()">Cancelar</button>
+            <button class="btn btn-primary" onclick="submitPay()">✓ Confirmar</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script type="module">
+    const token = localStorage.getItem('alugamais_token');
+    if (!token) window.location.href = '/login.html';
+    window.logout = () => { localStorage.removeItem('alugamais_token'); window.location.href = '/login.html'; };
+
+    const BRL = new Intl.NumberFormat('pt-BR', { style:'currency', currency:'BRL' });
+    let allCharges = [];
+    let filters = { status: 'all', month: '' };
+    let pendingCharge = null;
+
+    function showToast(msg, type = 'success') {
+        const c = document.getElementById('toastContainer');
+        const t = document.createElement('div');
+        t.className = `toast toast-${type}`;
+        t.innerHTML = `<span class="toast-icon">${type === 'success' ? '✓' : '✕'}</span>${msg}`;
+        c.appendChild(t);
+        requestAnimationFrame(() => t.classList.add('show'));
+        setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 400); }, 3500);
+    }
+
+    function statusBadge(s) {
+        const m = { paid:'badge-success', pending:'badge-warning', late:'badge-danger' };
+        const l = { paid:'Pago', pending:'Pendente', late:'Atrasado' };
+        return `<span class="badge ${m[s]||'badge-secondary'}">${l[s]||s}</span>`;
+    }
+
+    function monthLabel(m, y) {
+        return new Date(y, m - 1, 1).toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' });
+    }
+
+    function populateMonthFilter() {
+        const monthSet = new Set();
+        allCharges.forEach(c => monthSet.add(`${c.year}-${String(c.month).padStart(2,'0')}`));
+        const sorted = Array.from(monthSet).sort().reverse();
+        const sel = document.getElementById('monthFilter');
+        sel.innerHTML = '<option value="">Todos os meses</option>' + sorted.map(k => {
+            const [y, m] = k.split('-');
+            const label = new Date(parseInt(y), parseInt(m)-1, 1).toLocaleDateString('pt-BR', { month:'long', year:'numeric' });
+            return `<option value="${k}">${label}</option>`;
+        }).join('');
+    }
+
+    function render() {
+        let list = allCharges;
+        if (filters.status !== 'all') list = list.filter(c => c.status === filters.status);
+        if (filters.month) {
+            const [y, m] = filters.month.split('-').map(Number);
+            list = list.filter(c => c.year === y && c.month === m);
+        }
+
+        // Stats (from filtered or all)
+        const base = allCharges;
+        document.getElementById('cs-total').textContent = base.length;
+        document.getElementById('cs-paid').textContent = base.filter(c=>c.status==='paid').length;
+        document.getElementById('cs-pending').textContent = base.filter(c=>c.status==='pending').length;
+        document.getElementById('cs-late').textContent = base.filter(c=>c.status==='late').length;
+        document.getElementById('cs-amount').textContent = BRL.format(base.filter(c=>c.status!=='paid').reduce((s,c)=>s+c.totalAmount,0));
+
+        const el = document.getElementById('charges-list');
+        if (list.length === 0) {
+            el.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📄</div><h3>Nenhuma cobrança encontrada</h3><p>Gere as cobranças do mês clicando no botão acima.</p></div>`;
+            return;
+        }
+
+        el.innerHTML = list.map(c => `
+            <div class="charge-item">
+                <div class="charge-tenant">
+                    <h4>${c.tenantName || '—'}</h4>
+                    <p>${c.address || '—'} · Vence dia ${c.dueDateDay || '?'}</p>
+                </div>
+                <div class="month-label">${monthLabel(c.month, c.year)}</div>
+                <div style="text-align:right;font-weight:700">${BRL.format(c.totalAmount)}</div>
+                <div>${statusBadge(c.status)}</div>
+                <div>
+                    ${c.status !== 'paid'
+                        ? `<button class="btn btn-success pay-btn-sm" onclick="openPay('${c.id}','${c.rentalId}',${c.totalAmount},'${c.tenantName||''}',${c.month},${c.year})">✓ Marcar Pago</button>`
+                        : `<a href="/rental-detail.html?id=${c.rentalId}" class="btn btn-glass pay-btn-sm">Ver</a>`
+                    }
+                </div>
+            </div>
+        `).join('');
+    }
+
+    window.setFilter = function(type, val, btn) {
+        filters[type] = val;
+        btn.closest('.filters-bar').querySelectorAll('.filter-btn').forEach(b => {
+            if (b.closest('.filters-bar') === btn.closest('.filters-bar')) {
+                // only reset buttons in same group
+            }
+        });
+        document.querySelectorAll('.filter-btn').forEach(b => {
+            if (b.getAttribute('onclick')?.includes(`'status'`)) b.classList.remove('active');
+        });
+        btn.classList.add('active');
+        render();
+    };
+
+    window.applyFilters = function() {
+        filters.month = document.getElementById('monthFilter').value;
+        render();
+    };
+
+    window.openPay = function(chargeId, rentalId, amount, tenant, month, year) {
+        pendingCharge = { chargeId, rentalId, amount };
+        document.getElementById('payAmount').value = amount;
+        document.getElementById('payDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('payNotes').value = '';
+        document.getElementById('modal-charge-info').textContent = `${tenant} · ${new Date(year, month-1, 1).toLocaleDateString('pt-BR', { month:'long', year:'numeric' })}`;
+        document.getElementById('payModal').classList.add('open');
+    };
+
+    window.closeModal = () => document.getElementById('payModal').classList.remove('open');
+
+    window.submitPay = async function() {
+        if (!pendingCharge) return;
+        const amount = document.getElementById('payAmount').value;
+        const paidAt = document.getElementById('payDate').value;
+        if (!amount || !paidAt) { showToast('Preencha valor e data.', 'error'); return; }
+        try {
+            const r = await fetch('/api/payments', {
+                method: 'POST',
+                headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${token}` },
+                body: JSON.stringify({
+                    rentalId: pendingCharge.rentalId,
+                    chargeId: pendingCharge.chargeId,
+                    amount, paidAt,
+                    paymentMethod: document.getElementById('payMethod').value,
+                    notes: document.getElementById('payNotes').value
+                })
+            });
+            if (!r.ok) throw new Error();
+            closeModal();
+            showToast('Pagamento registrado com sucesso!');
+            loadCharges();
+        } catch(e) { showToast('Erro ao registrar pagamento.', 'error'); }
+    };
+
+    window.generateAll = async function() {
+        try {
+            const r = await fetch('/api/charges', {
+                method:'POST',
+                headers:{ 'Content-Type':'application/json', 'Authorization':`Bearer ${token}` },
+                body:'{}'
+            });
+            const d = await r.json();
+            showToast(`${d.generated} cobrança(s) gerada(s)!`);
+            loadCharges();
+        } catch(e) { showToast('Erro ao gerar cobranças.', 'error'); }
+    };
+
+    async function loadCharges() {
+        try {
+            const res = await fetch('/api/charges', { headers: { 'Authorization':`Bearer ${token}` } });
+            if (res.status === 401) return window.logout();
+            allCharges = await res.json();
+            populateMonthFilter();
+            render();
+        } catch(e) {
+            document.getElementById('charges-list').innerHTML = '<div class="empty-state"><p>⚠️ Erro ao carregar cobranças.</p></div>';
+        }
+    }
+    loadCharges();
+</script>
+</body>
+</html>

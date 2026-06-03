@@ -1,210 +1,441 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AlugaMais - Gerenciamento Inteligente de Aluguéis</title>
-    <meta
-      name="description"
-      content="O sistema definitivo para gestão de aluguéis, taxas e pagamentos. Seu assistente financeiro automágico."
-    />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="/css/global.css" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AlugaMais — Sistema Completo de Gestão de Aluguéis</title>
+    <meta name="description" content="Gerencie seus imóveis, inquilinos, cobranças e pagamentos em um só lugar. Simples, rápido e profissional.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/global.css">
     <style>
-      /* Landing Page specific styles */
-      header {
-        padding: 1.5rem 0;
-        position: fixed;
-        width: 100%;
-        top: 0;
-        z-index: 100;
-        backdrop-filter: blur(10px);
-        border-bottom: 1px solid var(--glass-border);
-      }
+        /* ── HEADER ── */
+        header {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            padding: 1rem 0;
+            background: hsla(var(--bg-color) / 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            transition: all 0.3s;
+        }
+        .header-inner {
+            display: flex; justify-content: space-between; align-items: center;
+            max-width: 1200px; margin: 0 auto; padding: 0 2rem;
+        }
+        .nav-logo { display: flex; align-items: center; gap: 0.6rem; font-size: 1.2rem; font-weight: 700; letter-spacing: -0.03em; color: hsl(var(--text-primary)); }
+        .nav-logo-mark {
+            width: 32px; height: 32px;
+            background: linear-gradient(135deg, hsl(var(--primary-color)), hsl(var(--accent)));
+            border-radius: 8px; display: flex; align-items: center; justify-content: center;
+            font-size: 0.8rem; font-weight: 800; color: white;
+            box-shadow: 0 4px 12px hsla(252,84%,67%,0.4);
+        }
+        .nav-links { display: flex; align-items: center; gap: 1rem; }
 
-      .header-content {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
+        /* ── HERO ── */
+        .hero {
+            min-height: 100vh;
+            display: flex; align-items: center; justify-content: center;
+            text-align: center;
+            padding: 6rem 2rem 4rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-glow {
+            position: absolute; width: 800px; height: 800px;
+            background: radial-gradient(circle, hsla(252,84%,67%,0.12) 0%, transparent 70%);
+            top: 50%; left: 50%; transform: translate(-50%, -50%);
+            pointer-events: none; z-index: 0;
+        }
+        .hero-glow-2 {
+            position: absolute; width: 500px; height: 500px;
+            background: radial-gradient(circle, hsla(195,85%,55%,0.08) 0%, transparent 70%);
+            top: 30%; right: 10%; pointer-events: none; z-index: 0;
+        }
+        /* Floating grid dots bg */
+        .hero::before {
+            content: '';
+            position: absolute; inset: 0;
+            background-image: radial-gradient(circle, hsla(var(--primary-color)/0.12) 1px, transparent 1px);
+            background-size: 32px 32px;
+            z-index: 0;
+            mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 20%, transparent 80%);
+        }
+        .hero-content { position: relative; z-index: 1; max-width: 860px; }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            background: hsla(var(--primary-color)/0.12);
+            border: 1px solid hsla(var(--primary-color)/0.25);
+            color: hsl(var(--primary-color));
+            padding: 0.4rem 1rem; border-radius: 999px;
+            font-size: 0.82rem; font-weight: 600; letter-spacing: 0.02em;
+            margin-bottom: 1.75rem;
+        }
+        .hero-badge-dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: hsl(var(--primary-color));
+            animation: pulse-dot 1.8s infinite;
+        }
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.7); }
+        }
+        .hero h1 {
+            font-size: clamp(2.4rem, 6vw, 4.5rem);
+            font-weight: 900; letter-spacing: -0.05em; line-height: 1.05;
+            margin-bottom: 1.5rem;
+        }
+        .hero h1 .gradient-text {
+            background: linear-gradient(135deg, hsl(var(--primary-color)) 0%, hsl(var(--accent)) 100%);
+            background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .hero-sub {
+            font-size: clamp(1rem, 2vw, 1.2rem);
+            color: hsl(var(--text-secondary));
+            max-width: 580px; margin: 0 auto 2.5rem;
+            line-height: 1.7;
+        }
+        .cta-group { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: 3rem; }
+        .btn-hero { padding: 0.85rem 2rem; font-size: 1rem; border-radius: var(--radius-md); }
 
-      .logo {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: hsl(var(--primary-color));
-        letter-spacing: -0.5px;
-      }
+        /* Hero stats strip */
+        .hero-stats {
+            display: flex; justify-content: center; gap: 3rem; flex-wrap: wrap;
+            padding-top: 2.5rem;
+            border-top: 1px solid var(--glass-border);
+        }
+        .hero-stat { text-align: center; }
+        .hero-stat-value { font-size: 1.8rem; font-weight: 800; letter-spacing: -0.04em; color: hsl(var(--text-primary)); }
+        .hero-stat-label { font-size: 0.8rem; color: hsl(var(--text-secondary)); margin-top: 0.2rem; }
 
-      .hero {
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        padding-top: 5rem;
-        position: relative;
-        overflow: hidden;
-      }
+        /* ── DASHBOARD PREVIEW ── */
+        .preview-section {
+            padding: 5rem 2rem;
+            max-width: 1200px; margin: 0 auto;
+            text-align: center;
+        }
+        .section-label {
+            font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em;
+            text-transform: uppercase; color: hsl(var(--primary-color));
+            margin-bottom: 0.75rem;
+        }
+        .section-title-lg {
+            font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 800;
+            letter-spacing: -0.04em; line-height: 1.2; margin-bottom: 1rem;
+        }
+        .section-sub { color: hsl(var(--text-secondary)); font-size: 1rem; max-width: 520px; margin: 0 auto 3rem; }
 
-      /* Ambient glow */
-      .glow {
-        position: absolute;
-        width: 600px;
-        height: 600px;
-        background: radial-gradient(
-          circle,
-          hsla(var(--primary-color), 0.15) 0%,
-          rgba(0, 0, 0, 0) 70%
-        );
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        z-index: -1;
-        pointer-events: none;
-      }
+        .preview-card {
+            background: hsl(var(--surface-color));
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.4);
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+        }
+        .preview-card::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, hsl(var(--primary-color)), hsl(var(--accent)));
+        }
+        .preview-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+        .preview-stat { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: 1rem; }
+        .preview-stat-val { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.04em; }
+        .preview-stat-lbl { font-size: 0.7rem; color: hsl(var(--text-secondary)); margin-top: 0.2rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+        .preview-row { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; background: var(--glass-bg); border-radius: var(--radius-md); margin-bottom: 0.5rem; border: 1px solid var(--glass-border); }
+        .preview-row-left { display: flex; align-items: center; gap: 0.75rem; }
+        .preview-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; color: white; flex-shrink: 0; }
 
-      h1 {
-        font-size: clamp(2.5rem, 5vw, 4.5rem);
-        line-height: 1.1;
-        margin-bottom: 1.5rem;
-        font-weight: 700;
-        letter-spacing: -1px;
-        background: linear-gradient(
-          135deg,
-          hsl(var(--text-primary)) 0%,
-          hsl(var(--text-secondary)) 100%
-        );
-        background-clip: text;
-        -webkit-text-fill-color: transparent;
-      }
+        /* ── FEATURES ── */
+        .features-section { padding: 5rem 2rem; max-width: 1200px; margin: 0 auto; }
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 3rem; }
+        .feature-card {
+            padding: 2rem; border-radius: var(--radius-lg);
+            border: 1px solid var(--glass-border);
+            background: var(--glass-bg);
+            transition: all var(--transition-speed);
+            position: relative; overflow: hidden;
+        }
+        .feature-card::after {
+            content: '';
+            position: absolute; inset: 0;
+            background: linear-gradient(135deg, hsla(var(--primary-color)/0.04), transparent);
+            opacity: 0; transition: opacity var(--transition-speed);
+        }
+        .feature-card:hover { border-color: hsla(var(--primary-color)/0.3); transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+        .feature-card:hover::after { opacity: 1; }
+        .feature-icon {
+            width: 48px; height: 48px; border-radius: var(--radius-md);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem; margin-bottom: 1.25rem;
+        }
+        .feature-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.6rem; }
+        .feature-card p { color: hsl(var(--text-secondary)); font-size: 0.9rem; line-height: 1.6; }
 
-      .subtitle {
-        font-size: 1.25rem;
-        color: hsl(var(--text-secondary));
-        max-width: 600px;
-        margin: 0 auto 2.5rem auto;
-      }
+        /* ── HOW IT WORKS ── */
+        .how-section { padding: 5rem 2rem; max-width: 900px; margin: 0 auto; text-align: center; }
+        .steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; margin-top: 3rem; }
+        .step { text-align: center; }
+        .step-num {
+            width: 48px; height: 48px;
+            background: linear-gradient(135deg, hsl(var(--primary-color)), hsl(var(--accent)));
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 1rem; font-weight: 800; color: white; margin: 0 auto 1rem;
+            box-shadow: 0 4px 16px hsla(252,84%,67%,0.35);
+        }
+        .step h4 { font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .step p { font-size: 0.88rem; color: hsl(var(--text-secondary)); line-height: 1.6; }
+        .step-connector { display: none; }
 
-      .cta-group {
-        display: flex;
-        gap: 1rem;
-        justify-content: center;
-      }
+        /* ── CTA SECTION ── */
+        .cta-section {
+            margin: 0 2rem 5rem;
+            max-width: 900px; margin-left: auto; margin-right: auto;
+            background: linear-gradient(135deg, hsla(var(--primary-color)/0.15), hsla(var(--accent)/0.08));
+            border: 1px solid hsla(var(--primary-color)/0.2);
+            border-radius: var(--radius-xl);
+            padding: 4rem 3rem; text-align: center;
+        }
+        .cta-section h2 { font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 800; letter-spacing: -0.04em; margin-bottom: 1rem; }
+        .cta-section p { color: hsl(var(--text-secondary)); font-size: 1rem; margin-bottom: 2rem; }
 
-      .btn-large {
-        padding: 0.8rem 2rem;
-        font-size: 1.1rem;
-      }
+        /* ── FOOTER ── */
+        footer {
+            text-align: center; padding: 2rem;
+            border-top: 1px solid var(--glass-border);
+            color: hsl(var(--text-muted)); font-size: 0.85rem;
+        }
+        .footer-logo { display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 700; color: hsl(var(--text-secondary)); margin-bottom: 0.5rem; }
 
-      .features {
-        padding: 5rem 0;
-      }
-
-      .features-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 2rem;
-        margin-top: 3rem;
-      }
-
-      .feature-card {
-        padding: 2rem;
-        transition: transform var(--transition-speed);
-      }
-
-      .feature-card:hover {
-        transform: translateY(-5px);
-        border-color: hsla(var(--primary-color), 0.3);
-      }
-
-      .feature-icon {
-        font-size: 2rem;
-        margin-bottom: 1rem;
-        color: hsl(var(--primary-color));
-      }
-
-      .feature-card h3 {
-        margin-bottom: 0.5rem;
-        font-size: 1.25rem;
-      }
-
-      .feature-card p {
-        color: hsl(var(--text-secondary));
-        font-size: 0.95rem;
-      }
+        @media (max-width: 768px) {
+            .preview-stats { grid-template-columns: repeat(2, 1fr); }
+            .steps-grid { grid-template-columns: 1fr; }
+        }
     </style>
-  </head>
-  <body>
-    <header>
-      <div class="container header-content">
-        <div class="logo">AlugaMais</div>
-        <nav>
-          <a href="/login.html" class="btn btn-glass">Entrar</a>
-        </nav>
-      </div>
-    </header>
+</head>
+<body>
 
-    <main>
-      <section class="hero">
-        <div class="glow"></div>
-        <div class="container">
-          <h1>Gerencie seus aluguéis<br />como um profissional.</h1>
-          <p class="subtitle">
-            O seu assistente inteligente que calcula taxas, controla vencimentos
-            e organiza todas as suas propriedades em um só lugar.
-          </p>
-          <div class="cta-group">
-            <a href="/register.html" class="btn btn-primary btn-large"
-              >Começar Gratuitamente</a
-            >
-            <a href="#features" class="btn btn-glass btn-large">Saiba mais</a>
-          </div>
+<!-- HEADER -->
+<header>
+    <div class="header-inner">
+        <div class="nav-logo">
+            <div class="nav-logo-mark">A+</div>
+            AlugaMais
         </div>
-      </section>
-
-      <section id="features" class="features container">
-        <h2 style="text-align: center; font-size: 2rem; margin-bottom: 1rem">
-          Por que usar o AlugaMais?
-        </h2>
-        <div class="features-grid">
-          <div class="feature-card glass-panel">
-            <div class="feature-icon">⚡</div>
-            <h3>Cálculo Automático</h3>
-            <p>
-              O sistema processa aluguéis, condomínios, IPTU e taxas de lixo
-              automaticamente, mês a mês.
-            </p>
-          </div>
-          <div class="feature-card glass-panel">
-            <div class="feature-icon">📊</div>
-            <h3>Painel Inteligente</h3>
-            <p>
-              Veja rapidamente o que está pendente, o que já foi pago e a sua
-              receita esperada do mês.
-            </p>
-          </div>
-          <div class="feature-card glass-panel">
-            <div class="feature-icon">🔄</div>
-            <h3>Taxas Variáveis</h3>
-            <p>
-              Mude o valor do condomínio ou adicione uma taxa extra durante o
-              mês sem quebrar o histórico financeiro.
-            </p>
-          </div>
+        <div class="nav-links">
+            <a href="#features" class="btn btn-glass btn-sm" style="display:none" id="featuresLink">Funcionalidades</a>
+            <a href="/login.html" class="btn btn-glass btn-sm">Entrar</a>
+            <a href="/register.html" class="btn btn-primary btn-sm">Começar grátis →</a>
         </div>
-      </section>
-    </main>
+    </div>
+</header>
 
-    <script>
-      // Check if user is already logged in
-      if (localStorage.getItem('alugamais_token')) {
-        window.location.href = '/dashboard.html'
-      }
-    </script>
-  </body>
+<!-- HERO -->
+<section class="hero">
+    <div class="hero-glow"></div>
+    <div class="hero-glow-2"></div>
+    <div class="hero-content">
+        <div class="hero-badge">
+            <div class="hero-badge-dot"></div>
+            Sistema completo de gestão de aluguéis
+        </div>
+        <h1>
+            Gerencie seus imóveis<br>
+            <span class="gradient-text">como um profissional.</span>
+        </h1>
+        <p class="hero-sub">
+            Controle aluguéis, inquilinos, cobranças e pagamentos em um painel inteligente. Geração automática de cobranças, relatórios financeiros e muito mais.
+        </p>
+        <div class="cta-group">
+            <a href="/register.html" class="btn btn-primary btn-hero">🚀 Começar gratuitamente</a>
+            <a href="/login.html" class="btn btn-glass btn-hero">Já tenho conta</a>
+        </div>
+        <div class="hero-stats">
+            <div class="hero-stat">
+                <div class="hero-stat-value">100%</div>
+                <div class="hero-stat-label">Serverless & rápido</div>
+            </div>
+            <div class="hero-stat">
+                <div class="hero-stat-value">6+</div>
+                <div class="hero-stat-label">Módulos integrados</div>
+            </div>
+            <div class="hero-stat">
+                <div class="hero-stat-value">0</div>
+                <div class="hero-stat-label">Cobranças manuais</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- DASHBOARD PREVIEW -->
+<div class="preview-section">
+    <div class="section-label">Dashboard</div>
+    <h2 class="section-title-lg">Tudo em um só painel</h2>
+    <p class="section-sub">Métricas em tempo real, alertas de vencimento e histórico completo ao alcance de um clique.</p>
+
+    <div class="preview-card">
+        <div class="preview-stats">
+            <div class="preview-stat">
+                <div class="preview-stat-val" style="color:hsl(var(--primary-color))">R$ 8.400</div>
+                <div class="preview-stat-lbl">Receita do mês</div>
+            </div>
+            <div class="preview-stat">
+                <div class="preview-stat-val" style="color:hsl(var(--success))">5</div>
+                <div class="preview-stat-lbl">Aluguéis ativos</div>
+            </div>
+            <div class="preview-stat">
+                <div class="preview-stat-val" style="color:hsl(var(--success))">R$ 6.200</div>
+                <div class="preview-stat-lbl">Recebido</div>
+            </div>
+            <div class="preview-stat">
+                <div class="preview-stat-val" style="color:hsl(var(--danger))">1</div>
+                <div class="preview-stat-lbl">Inadimplentes</div>
+            </div>
+        </div>
+        <div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:hsl(var(--text-secondary));margin-bottom:0.75rem">Aluguéis Ativos</div>
+        <div class="preview-row">
+            <div class="preview-row-left">
+                <div class="preview-avatar" style="background:linear-gradient(135deg,hsl(var(--primary-color)),hsl(var(--accent)))">JM</div>
+                <div>
+                    <div style="font-size:0.88rem;font-weight:600">João Mendes</div>
+                    <div style="font-size:0.75rem;color:hsl(var(--text-secondary))">Rua das Flores, 123 · Vence dia 5</div>
+                </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:0.75rem">
+                <span class="badge badge-success">Pago</span>
+                <span style="font-weight:700;font-size:0.9rem">R$ 1.800</span>
+            </div>
+        </div>
+        <div class="preview-row">
+            <div class="preview-row-left">
+                <div class="preview-avatar" style="background:linear-gradient(135deg,hsl(195,85%,55%),hsl(220,80%,60%))">AS</div>
+                <div>
+                    <div style="font-size:0.88rem;font-weight:600">Ana Silva</div>
+                    <div style="font-size:0.75rem;color:hsl(var(--text-secondary))">Av. Paulista, 456 · Vence dia 10</div>
+                </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:0.75rem">
+                <span class="badge badge-warning">Pendente</span>
+                <span style="font-weight:700;font-size:0.9rem">R$ 2.200</span>
+            </div>
+        </div>
+        <div class="preview-row">
+            <div class="preview-row-left">
+                <div class="preview-avatar" style="background:linear-gradient(135deg,hsl(38,95%,60%),hsl(25,90%,55%))">RC</div>
+                <div>
+                    <div style="font-size:0.88rem;font-weight:600">Roberto Costa</div>
+                    <div style="font-size:0.75rem;color:hsl(var(--text-secondary))">Rua Augusta, 789 · Vence dia 15</div>
+                </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:0.75rem">
+                <span class="badge badge-danger">Atrasado</span>
+                <span style="font-weight:700;font-size:0.9rem">R$ 1.500</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- FEATURES -->
+<section id="features" class="features-section">
+    <div style="text-align:center">
+        <div class="section-label">Funcionalidades</div>
+        <h2 class="section-title-lg">Tudo que você precisa</h2>
+        <p class="section-sub">Um sistema completo, sem planilhas, sem complicação.</p>
+    </div>
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon" style="background:hsla(var(--primary-color)/0.12)">📊</div>
+            <h3>Dashboard com 6 métricas</h3>
+            <p>Receita do mês, recebido, pendente, inadimplentes, YTD e taxa de ocupação — tudo visível em segundos.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon" style="background:hsla(var(--success)/0.12)">⚡</div>
+            <h3>Cobranças Automáticas</h3>
+            <p>Gere as cobranças do mês com um clique. O sistema calcula aluguel, condomínio, IPTU e taxas variáveis automaticamente.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon" style="background:hsla(var(--accent)/0.12)">💳</div>
+            <h3>Gestão de Pagamentos</h3>
+            <p>Registre pagamentos via PIX, transferência, dinheiro ou cheque. Marque cobranças como pagas com um clique.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon" style="background:hsla(var(--warning)/0.12)">📈</div>
+            <h3>Relatórios Financeiros</h3>
+            <p>Gráfico de barras dos últimos 12 meses, taxa de recebimento, ticket médio e receita por imóvel.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon" style="background:hsla(var(--info)/0.12)">🏠</div>
+            <h3>Portfólio de Imóveis</h3>
+            <p>Visualize todos os seus imóveis em cards organizados com tipo, área, quartos e status de ocupação.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon" style="background:hsla(var(--danger)/0.12)">👥</div>
+            <h3>Gestão de Inquilinos</h3>
+            <p>Cadastre e-mail, telefone, CPF/CNPJ, garantia, índice de reajuste e histórico completo de cada inquilino.</p>
+        </div>
+    </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-section">
+    <div class="section-label">Como funciona</div>
+    <h2 class="section-title-lg">Comece em 3 passos simples</h2>
+    <div class="steps-grid">
+        <div class="step">
+            <div class="step-num">1</div>
+            <h4>Crie sua conta</h4>
+            <p>Cadastro gratuito em segundos. Sem cartão de crédito, sem complicação.</p>
+        </div>
+        <div class="step">
+            <div class="step-num">2</div>
+            <h4>Cadastre seus imóveis</h4>
+            <p>Adicione endereço, inquilino, taxas, vencimento e índice de reajuste.</p>
+        </div>
+        <div class="step">
+            <div class="step-num">3</div>
+            <h4>Controle tudo</h4>
+            <p>Gere cobranças, registre pagamentos e acompanhe relatórios financeiros.</p>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-section">
+    <h2>Pronto para organizar<br>seus aluguéis?</h2>
+    <p>Comece hoje mesmo, gratuitamente. Sem burocracia.</p>
+    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+        <a href="/register.html" class="btn btn-primary btn-hero">🚀 Criar conta grátis</a>
+        <a href="/login.html" class="btn btn-glass btn-hero">Já tenho conta</a>
+    </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+    <div class="footer-logo">
+        <div style="width:22px;height:22px;background:linear-gradient(135deg,hsl(var(--primary-color)),hsl(var(--accent)));border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:0.6rem;font-weight:800;color:white">A+</div>
+        AlugaMais
+    </div>
+    <p style="margin-top:0.25rem">© 2026 AlugaMais — Sistema de Gestão de Aluguéis</p>
+</footer>
+
+<script>
+    if (localStorage.getItem('alugamais_token')) {
+        window.location.href = '/dashboard.html';
+    }
+    // Show features link after scroll
+    const featuresLink = document.getElementById('featuresLink');
+    window.addEventListener('scroll', () => {
+        featuresLink.style.display = window.scrollY > 100 ? 'inline-flex' : 'none';
+    });
+    // Smooth scroll
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+        a.addEventListener('click', e => {
+            const target = document.querySelector(a.getAttribute('href'));
+            if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth' }); }
+        });
+    });
+</script>
+</body>
 </html>

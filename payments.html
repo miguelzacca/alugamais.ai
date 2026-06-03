@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagamentos — AlugaMais</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/global.css">
+    <style>
+        .pay-row {
+            display: grid;
+            grid-template-columns: 44px 1fr 140px 110px 100px;
+            gap: 1rem; align-items: center;
+            padding: 1rem 1.5rem; border-bottom: 1px solid var(--glass-border);
+            transition: background var(--transition-speed);
+        }
+        .pay-row:hover { background: var(--glass-bg); }
+        .pay-row:last-child { border-bottom: none; }
+        .pay-header {
+            display: grid;
+            grid-template-columns: 44px 1fr 140px 110px 100px;
+            gap: 1rem; padding: 0.7rem 1.5rem;
+            font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em;
+            text-transform: uppercase; color: hsl(var(--text-secondary));
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .pay-avatar {
+            width: 38px; height: 38px; border-radius: 50%;
+            background: hsla(var(--success)/0.15);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1rem; flex-shrink: 0;
+        }
+        .pay-info h4 { font-size: 0.9rem; font-weight: 600; margin-bottom: 0.15rem; }
+        .pay-info p { font-size: 0.8rem; color: hsl(var(--text-secondary)); }
+        .method-badge {
+            display: inline-flex; align-items: center; gap: 0.35rem;
+            padding: 0.25rem 0.65rem; border-radius: 999px;
+            font-size: 0.75rem; font-weight: 500;
+            background: var(--glass-bg); border: 1px solid var(--glass-border);
+            color: hsl(var(--text-secondary));
+        }
+        .search-bar { position: relative; flex: 1; min-width: 220px; }
+        .search-bar input { padding-left: 2.5rem; }
+        .search-icon { position: absolute; left: 0.85rem; top: 50%; transform: translateY(-50%); color: hsl(var(--text-secondary)); font-size: 0.9rem; pointer-events: none; }
+    </style>
+</head>
+<body>
+<div class="app-layout">
+    <aside class="sidebar">
+        <div class="sidebar-logo"><div class="sidebar-logo-mark">A+</div>AlugaMais</div>
+        <span class="sidebar-section-label">Menu</span>
+        <nav>
+            <a href="/dashboard.html" class="nav-link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Painel</a>
+            <a href="/properties.html" class="nav-link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Imóveis</a>
+            <a href="/tenants.html" class="nav-link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>Inquilinos</a>
+            <a href="/charges.html" class="nav-link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Cobranças</a>
+            <a href="/payments.html" class="nav-link active"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Pagamentos</a>
+            <a href="/reports.html" class="nav-link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Relatórios</a>
+        </nav>
+        <div class="sidebar-footer"><button class="logout-btn" onclick="logout()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Sair</button></div>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Pagamentos</h1>
+                <p class="page-subtitle">Histórico completo de pagamentos recebidos</p>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));margin-bottom:1.5rem">
+            <div class="stat-card glass-panel"><div class="stat-label">Total Recebido</div><div class="stat-value text-success" id="ps-total">—</div></div>
+            <div class="stat-card glass-panel"><div class="stat-label">Mês Atual</div><div class="stat-value" id="ps-month">—</div></div>
+            <div class="stat-card glass-panel"><div class="stat-label">Qtd. Pagamentos</div><div class="stat-value" id="ps-count">—</div></div>
+            <div class="stat-card glass-panel"><div class="stat-label">Ticket Médio</div><div class="stat-value" id="ps-avg">—</div></div>
+        </div>
+
+        <!-- Filters -->
+        <div style="display:flex;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap">
+            <div class="search-bar">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" class="form-control" placeholder="Buscar inquilino ou endereço...">
+            </div>
+            <select id="methodFilter" class="form-control" style="width:auto;min-width:160px" onchange="render()">
+                <option value="">Todos os métodos</option>
+                <option value="pix">PIX</option>
+                <option value="transfer">Transferência</option>
+                <option value="cash">Dinheiro</option>
+                <option value="check">Cheque</option>
+                <option value="other">Outro</option>
+            </select>
+            <select id="monthFilter" class="form-control" style="width:auto;min-width:160px" onchange="render()">
+                <option value="">Todos os períodos</option>
+            </select>
+        </div>
+
+        <div class="glass-panel" style="overflow:hidden">
+            <div class="pay-header">
+                <div></div>
+                <div>Inquilino / Imóvel</div>
+                <div style="text-align:right">Valor</div>
+                <div>Método</div>
+                <div>Data</div>
+            </div>
+            <div id="payments-list">
+                <div style="text-align:center;padding:3rem;color:hsl(var(--text-secondary))">Carregando...</div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script type="module">
+    const token = localStorage.getItem('alugamais_token');
+    if (!token) window.location.href = '/login.html';
+    window.logout = () => { localStorage.removeItem('alugamais_token'); window.location.href = '/login.html'; };
+
+    const BRL = new Intl.NumberFormat('pt-BR', { style:'currency', currency:'BRL' });
+    let allPayments = [];
+    const now = new Date();
+    const methodLabels = { pix:'💠 PIX', transfer:'🏦 Transferência', cash:'💵 Dinheiro', check:'📄 Cheque', other:'💳 Outro' };
+    const methodIcons = { pix:'💠', transfer:'🏦', cash:'💵', check:'📄', other:'💳' };
+
+    function populateMonthFilter() {
+        const monthSet = new Set();
+        allPayments.forEach(p => {
+            const d = new Date(p.paidAt);
+            monthSet.add(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`);
+        });
+        const sorted = Array.from(monthSet).sort().reverse();
+        const sel = document.getElementById('monthFilter');
+        sel.innerHTML = '<option value="">Todos os períodos</option>' + sorted.map(k => {
+            const [y, m] = k.split('-');
+            const label = new Date(parseInt(y), parseInt(m)-1, 1).toLocaleDateString('pt-BR', { month:'long', year:'numeric' });
+            return `<option value="${k}">${label}</option>`;
+        }).join('');
+    }
+
+    window.render = function() {
+        const search = document.getElementById('searchInput').value.toLowerCase();
+        const method = document.getElementById('methodFilter').value;
+        const monthKey = document.getElementById('monthFilter').value;
+
+        let list = allPayments;
+        if (search) list = list.filter(p =>
+            (p.tenantName||'').toLowerCase().includes(search) ||
+            (p.address||'').toLowerCase().includes(search)
+        );
+        if (method) list = list.filter(p => p.paymentMethod === method);
+        if (monthKey) {
+            const [y, m] = monthKey.split('-').map(Number);
+            list = list.filter(p => {
+                const d = new Date(p.paidAt);
+                return d.getFullYear() === y && d.getMonth()+1 === m;
+            });
+        }
+
+        // Stats from full list
+        const totalReceived = allPayments.reduce((s,p) => s+p.amount, 0);
+        const thisMonth = allPayments.filter(p => {
+            const d = new Date(p.paidAt);
+            return d.getMonth()+1 === now.getMonth()+1 && d.getFullYear() === now.getFullYear();
+        }).reduce((s,p) => s+p.amount, 0);
+        document.getElementById('ps-total').textContent = BRL.format(totalReceived);
+        document.getElementById('ps-month').textContent = BRL.format(thisMonth);
+        document.getElementById('ps-count').textContent = allPayments.length;
+        document.getElementById('ps-avg').textContent = allPayments.length > 0 ? BRL.format(totalReceived / allPayments.length) : BRL.format(0);
+
+        const el = document.getElementById('payments-list');
+        if (list.length === 0) {
+            el.innerHTML = `<div class="empty-state"><div class="empty-state-icon">💳</div><h3>Nenhum pagamento encontrado</h3><p>Os pagamentos registrados aparecerão aqui.</p></div>`;
+            return;
+        }
+
+        el.innerHTML = list.map(p => `
+            <div class="pay-row">
+                <div class="pay-avatar">${methodIcons[p.paymentMethod] || '💳'}</div>
+                <div class="pay-info">
+                    <h4>${p.tenantName || '—'}</h4>
+                    <p>${p.address || '—'}${p.notes ? ` · ${p.notes}` : ''}</p>
+                </div>
+                <div style="text-align:right;font-weight:700;color:hsl(var(--success))">${BRL.format(p.amount)}</div>
+                <div><span class="method-badge">${methodLabels[p.paymentMethod] || p.paymentMethod}</span></div>
+                <div class="text-sm text-muted">${new Date(p.paidAt).toLocaleDateString('pt-BR')}</div>
+            </div>
+        `).join('');
+    };
+
+    document.getElementById('searchInput').addEventListener('input', () => render());
+
+    async function load() {
+        try {
+            const res = await fetch('/api/payments', { headers: { 'Authorization':`Bearer ${token}` } });
+            if (res.status === 401) return window.logout();
+            allPayments = await res.json();
+            populateMonthFilter();
+            render();
+        } catch(e) {
+            document.getElementById('payments-list').innerHTML = '<div class="empty-state"><p>⚠️ Erro ao carregar pagamentos.</p></div>';
+        }
+    }
+    load();
+</script>
+</body>
+</html>
